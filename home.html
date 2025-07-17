@@ -146,6 +146,10 @@
     }
 
     .card_image_wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 10px;
         box-sizing: border-box;
     }
 
@@ -172,6 +176,14 @@
       margin: 0;
     }
 
+    /* Image Visibility Logic */
+    .dark-mode-img {
+      display: none;
+    }
+    .light-mode-img {
+      display: block;
+    }
+
     /* Dark Mode Styles for Readme - System Preference */
     @media (prefers-color-scheme: dark) {
       [data-color-mode="system"] body { background-color: #121212; }
@@ -184,6 +196,8 @@
       [data-color-mode="system"] .card_content p { color: #BBB; }
       [data-color-mode="system"] .card:hover { border-color: #007BFF; }
       [data-color-mode="system"] .card:hover .card_content h3 { color: #007BFF !important; }
+      [data-color-mode="system"] .light-mode-img { display: none; }
+      [data-color-mode="system"] .dark-mode-img { display: block; }
     }
 
     /* Dark Mode Styles for Readme - Explicitly set to Dark */
@@ -199,6 +213,8 @@
     [data-color-mode="dark"] .card_content p { color: #BBB; }
     [data-color-mode="dark"] .card:hover { border-color: #007BFF; }
     [data-color-mode="dark"] .card:hover .card_content h3 { color: #007BFF !important; }
+    [data-color-mode="dark"] .light-mode-img { display: none; }
+    [data-color-mode="dark"] .dark-mode-img { display: block; }
 
 
     /* Responsive Media Queries */
@@ -242,7 +258,10 @@
           <h3>Getting Started</h3>
           <p>Provides secure, real-time connectivity between devices, services, and applications via robust API endpoints.</p>
         </div>
-        <div class="card_image_wrapper"><img src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/getting-started.png" alt="Getting Started illustration"></div>
+        <div class="card_image_wrapper">
+          <img class="light-mode-img" src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/getting-started.png" alt="Getting Started illustration">
+          <img class="dark-mode-img" src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/dm/getting-started.png" alt="Getting Started illustration (dark mode)">
+        </div>
       </a>
 
       <div class="right-column-wrapper">
@@ -253,7 +272,10 @@
               <h3>Quote Management</h3>
               <p>Provides secure, real-time connectivity between devices, services, and applications via robust API endpoints.</p>
             </div>
-            <div class="card_image_wrapper"><img src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/quote-management.png" alt="Quote Management illustration"></div>
+            <div class="card_image_wrapper">
+              <img class="light-mode-img" src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/quote-management.png" alt="Quote Management illustration">
+              <img class="dark-mode-img" src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/dm/quote-management.png" alt="Quote Management illustration (dark mode)">
+            </div>
           </a>
           <!-- Card 3: Top Small -->
           <a class="card" href="#">
@@ -261,7 +283,10 @@
               <h3>External Queries</h3>
               <p>Provides secure, real-time connectivity between devices.</p>
             </div>
-            <div class="card_image_wrapper"><img src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/external-queries.png" alt="External Queries illustration"></div>
+            <div class="card_image_wrapper">
+              <img class="light-mode-img" src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/external-queries.png" alt="External Queries illustration">
+              <img class="dark-mode-img" src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/dm/external-queries.png" alt="External Queries illustration (dark mode)">
+            </div>
           </a>
         </div>
 
@@ -272,7 +297,10 @@
               <h3>Callouts</h3>
               <p>Provides secure, real-time connectivity between devices, services.</p>
             </div>
-            <div class="card_image_wrapper"><img src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/callouts.png" alt="Callouts illustration"></div>
+            <div class="card_image_wrapper">
+              <img class="light-mode-img" src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/callouts.png" alt="Callouts illustration">
+              <img class="dark-mode-img" src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/dm/callouts.png" alt="Callouts illustration (dark mode)">
+            </div>
           </a>
           <!-- Card 5: Bottom Large -->
           <a class="card" href="#">
@@ -280,7 +308,10 @@
               <h3>Headless Quotes</h3>
               <p>Provides secure, real-time connectivity between devices, services.</p>
             </div>
-            <div class="card_image_wrapper"><img src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/headless-quotes.png" alt="Headless Quotes illustration"></div>
+            <div class="card_image_wrapper">
+                <img class="light-mode-img" src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/headless-quotes.png" alt="Headless Quotes illustration">
+                <img class="dark-mode-img" src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/dm/headless-quotes.png" alt="Headless Quotes illustration (dark mode)">
+            </div>
           </a>
         </div>
       </div>
