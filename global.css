@@ -1,0 +1,345 @@
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
+
+:root {
+  --icon-height: 18px;
+  --icon-width: 18px;
+
+  /* Info Callout Colors */
+  --info-light-bg: #def7ff;
+  --info-light-border: #53aae0;
+  --info-light-header: #53aae0;
+  --info-light-text: #384248;
+  --info-light-link: #53aae0;
+  --info-dark-bg: #3a535c;
+  --info-dark-border: #53aae0;
+  --info-dark-header: #53aae0;
+  --info-dark-text: #fff;
+  --info-dark-link: #53aae0;
+
+  /* Okay Callout Colors */
+  --okay-light-bg: #e1faf5;
+  --okay-light-border: #68f2d7;
+  --okay-light-header: #22d1af;
+  --okay-light-text: #384248;
+  --okay-light-link: #15947f;
+  --okay-dark-bg: #15947f6c;
+  --okay-dark-border: #1db397;
+  --okay-dark-header: #68f2d7;
+  --okay-dark-text: #fdfdfd;
+  --okay-dark-link: #68f2d7;
+
+  /* Default Callout Colors */
+  --default-light-bg: #f8f8f8;
+  --default-light-border: #acacac;
+  --default-light-text: #384248;
+  --default-dark-bg: #2c2c2c;
+  --default-dark-text: #ffffff;
+
+  /* Warn Callout Colors */
+  --warn-light-bg: #fcebdc;
+  --warn-light-border: #e05c34;
+  --warn-light-header: #e05c34;
+  --warn-light-text: #384248;
+  --warn-light-link: #e05c34;
+  --warn-dark-bg: #544843;
+  --warn-dark-border: #e05c34;
+  --warn-dark-header: #e05c34;
+  --warn-dark-text: #fff;
+  --warn-dark-link: #e05c34;
+
+  /* Error Callout Colors */
+  --error-light-bg: #ffe9ed;
+  --error-light-border: #ff506f;
+  --error-light-header: #ff506f;
+  --error-light-text: #384248;
+  --error-light-link: #ff506f;
+  --error-dark-bg: #52363c;
+  --error-dark-border: #ff506f;
+  --error-dark-header: #ff506f;
+  --error-dark-text: #fff;
+  --error-dark-link: #ff506f;
+}
+
+.callout {
+  border-radius: 6px;
+}
+
+.callout p {
+  font-feature-settings: "clig" off, "liga" off;
+  font-family: "Open Sans";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+.callout .callout-heading p {
+  font-size: 17.5px;
+  font-weight: 700;
+}
+
+/* INFO CALLOUT */
+.callout.callout_info {
+  border-left: 6px solid var(--info-light-border);
+  background: var(--info-light-bg);
+}
+
+.callout.callout_info .callout-heading p {
+  color: var(--info-light-text1);
+}
+
+.callout.callout_info p,
+.callout.callout_info ul {
+  color: var(--info-light-text);
+}
+
+.callout.callout_info a {
+  color: var(--info-light-link);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-color-mode="system"] .callout.callout_info {
+    background-color: var(--info-dark-bg) !important;
+  }
+
+  [data-color-mode="system"] .callout.callout_info .callout-heading p {
+    color: var(--info-dark-header) !important;
+  }
+
+  [data-color-mode="system"] .callout.callout_info p,
+  [data-color-mode="system"] .callout.callout_info ul {
+    color: var(--info-dark-text) !important;
+  }
+
+  [data-color-mode="system"] .callout.callout_info a {
+    color: var(--info-dark-link) !important;
+  }
+}
+
+[data-color-mode="dark"] .callout.callout_info {
+  background-color: var(--info-dark-bg) !important;
+}
+
+[data-color-mode="dark"] .callout.callout_info .callout-heading p {
+  color: var(--info-dark-header) !important;
+}
+
+[data-color-mode="dark"] .callout.callout_info p,
+[data-color-mode="dark"] .callout.callout_info ul {
+  color: var(--info-dark-text) !important;
+}
+
+[data-color-mode="dark"] .callout.callout_info a {
+  color: var(--info-dark-link) !important;
+}
+
+/* INFO CALLOUT */
+
+/* OKAY CALLOUT */
+.callout.callout_okay {
+  border-left: 6px solid var(--okay-light-border);
+  background: var(--okay-light-bg);
+}
+
+.callout.callout_okay .callout-heading p {
+  color: var(--okay-light-header);
+}
+
+.callout.callout_okay p,
+.callout.callout_okay ul {
+  color: var(--okay-light-text);
+}
+
+.callout.callout_okay a {
+  color: var(--okay-light-link);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-color-mode="system"] .callout.callout_okay {
+    background-color: var(--okay-dark-bg) !important;
+  }
+
+  [data-color-mode="system"] .callout.callout_okay .callout-heading p {
+    color: var(--okay-dark-header) !important;
+  }
+
+  [data-color-mode="system"] .callout.callout_okay p,
+  [data-color-mode="system"] .callout.callout_okay ul {
+    color: var(--okay-dark-text) !important;
+  }
+
+  [data-color-mode="system"] .callout.callout_okay a {
+    color: var(--okay-dark-link) !important;
+  }
+}
+
+[data-color-mode="dark"] .callout.callout_okay {
+  background-color: var(--okay-dark-bg) !important;
+}
+
+[data-color-mode="dark"] .callout.callout_okay .callout-heading p {
+  color: var(--okay-dark-header) !important;
+}
+
+[data-color-mode="dark"] .callout.callout_okay p,
+[data-color-mode="dark"] .callout.callout_okay ul {
+  color: var(--okay-dark-text) !important;
+}
+
+[data-color-mode="dark"] .callout.callout_okay a {
+  color: var(--okay-dark-link) !important;
+}
+
+/* OKAY CALLOUT */
+
+/* DEFAULT CALLOUT */
+.callout.callout_default {
+  border-left: 6px solid var(--default-light-border);
+  background: var(--default-light-bg);
+}
+
+.callout.callout_default ul,
+.callout.callout_default p {
+  color: var(--default-light-text);
+}
+
+.callout.callout_default .callout-heading p {
+  color: var(--default-light-text);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-color-mode="system"] .callout.callout_default {
+    background-color: var(--default-dark-bg) !important;
+  }
+
+  [data-color-mode="system"] .callout.callout_default p,
+  [data-color-mode="system"] .callout.callout_default ul,
+  [data-color-mode="system"] .callout.callout_default .callout-heading p {
+    color: var(--default-dark-text) !important;
+  }
+}
+
+[data-color-mode="dark"] .callout.callout_default {
+  background-color: var(--default-dark-bg) !important;
+}
+
+[data-color-mode="dark"] .callout.callout_default p,
+[data-color-mode="dark"] .callout.callout_default ul,
+[data-color-mode="dark"] .callout.callout_default .callout-heading p {
+  color: var(--default-dark-text) !important;
+}
+
+/* DEFAULT CALLOUT */
+
+/* WARN CALLOUT */
+.callout.callout_warn {
+  border-left: 6px solid var(--warn-light-border);
+  background: var(--warn-light-bg);
+}
+
+.callout.callout_warn .callout-heading p {
+  color: var(--warn-light-header);
+}
+
+.callout.callout_warn ul,
+.callout.callout_warn p {
+  color: var(--warn-light-text);
+}
+
+.callout.callout_warn a {
+  color: var(--warn-light-link);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-color-mode="system"] .callout.callout_warn {
+    background-color: var(--warn-dark-bg) !important;
+  }
+
+  [data-color-mode="system"] .callout.callout_warn .callout-heading p {
+    color: var(--warn-dark-header);
+  }
+
+  [data-color-mode="system"] .callout.callout_warn ul,
+  [data-color-mode="system"] .callout.callout_warn p {
+    color: var(--warn-dark-text);
+  }
+
+  [data-color-mode="system"] .callout.callout_warn a {
+    color: var(--warn-dark-link);
+  }
+}
+
+[data-color-mode="dark"] .callout.callout_warn {
+  background-color: var(--warn-dark-bg) !important;
+}
+
+[data-color-mode="dark"] .callout.callout_warn .callout-heading p {
+  color: var(--warn-dark-header);
+}
+
+[data-color-mode="dark"] .callout.callout_warn ul,
+[data-color-mode="dark"] .callout.callout_warn p {
+  color: var(--warn-dark-text);
+}
+
+[data-color-mode="dark"] .callout.callout_warn a {
+  color: var(--warn-dark-link);
+}
+
+/* WARN CALLOUT */
+
+/* ERROR CALLOUT */
+.callout.callout_error {
+  border-left: 6px solid var(--error-light-border);
+  background: var(--error-light-bg);
+}
+
+.callout.callout_error .callout-heading p {
+  color: var(--error-light-header);
+}
+
+.callout.callout_error ul,
+.callout.callout_error p {
+  color: var(--error-light-text);
+}
+
+.callout.callout_error a {
+  color: var(--error-light-link);
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-color-mode="system"] .callout.callout_error {
+    background-color: var(--error-dark-bg) !important;
+  }
+
+  [data-color-mode="system"] .callout.callout_error .callout-heading p {
+    color: var(--error-dark-header);
+  }
+
+  [data-color-mode="system"] .callout.callout_error ul,
+  [data-color-mode="system"] .callout.callout_error p {
+    color: var(--error-dark-text);
+  }
+
+  [data-color-mode="system"] .callout.callout_error a {
+    color: var(--error-dark-link);
+  }
+}
+
+[data-color-mode="dark"] .callout.callout_error {
+  background-color: var(--error-dark-bg) !important;
+}
+
+[data-color-mode="dark"] .callout.callout_error .callout-heading p {
+  color: var(--error-dark-header);
+}
+
+[data-color-mode="dark"] .callout.callout_error ul,
+[data-color-mode="dark"] .callout.callout_error p {
+  color: var(--error-dark-text);
+}
+
+[data-color-mode="dark"] .callout.callout_error a {
+  color: var(--error-dark-link);
+}
+/* ERROR CALLOUT */
