@@ -153,6 +153,17 @@
       object-fit: contain;
       box-sizing: border-box;
     }
+    
+    /* Mobile: Troca imagem do card 'Getting Started' para versão responsiva */
+    @media only screen and (max-width: 768px) {
+      .card.card-large-vertical .card_image_wrapper .light-mode-img {
+        size: 10%;
+        content: url('https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/get-started2.png');
+      }
+      .card.card-large-vertical .card_image_wrapper .dark-mode-img {
+        content: url('https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/dm/get-started2.png');
+      }
+    }
 
     .card_content {
       padding: 25px;
