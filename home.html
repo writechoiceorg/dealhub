@@ -36,7 +36,7 @@
       background-size: cover;
       background-position: center;
       width: 100%;
-      padding: 80px 20px;
+      padding: 40px 20px;
       box-sizing: border-box;
     }
 
@@ -74,12 +74,14 @@
       display: grid;
       grid-template-columns: 1fr 2fr;
       gap: 20px;
-    .card_content {
-      padding: 25px;
-      flex-grow: 1;
-      position: relative;
-      z-index: 2;
-    }
+
+      .card_content {
+        padding: 25px;
+        flex-grow: 1;
+        position: relative;
+        z-index: 2;
+      }
+
       padding: 0 20px;
       margin: 0 auto;
       max-width: var(--container-lg);
@@ -154,6 +156,7 @@
       align-items: center;
       justify-content: center;
     }
+
     .card_image_wrapper {
       height: 100%;
       min-height: 140px;
@@ -170,18 +173,6 @@
       object-fit: contain;
       box-sizing: border-box;
       align-items: center;
-    }
-    
-    /* Mobile: Troca imagem do card 'Getting Started' para versão responsiva */
-    @media only screen and (max-width: 768px) {
-      .card.card-large-vertical .card_image_wrapper .light-mode-img {
-        max-height: 340px;
-        content: url('https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/get-started2.png');
-      }
-      .card.card-large-vertical .card_image_wrapper .dark-mode-img {
-        max-height: 340px;
-        content: url('https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/dm/get-started2.png');
-      }
     }
 
     .card_content {
@@ -305,6 +296,26 @@
       .hero_content {
         font-size: 16px;
       }
+
+      .card.card-large-vertical {
+        flex-direction: row;
+        max-height: 250px;
+        justify-content: space-between;
+      }
+
+      .card.card-large-vertical .card_image_wrapper {
+        justify-content: end;
+      }
+
+      .card.card-large-vertical .card_image_wrapper .light-mode-img {
+        max-height: 340px;
+        content: url('https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/get-started2.png');
+      }
+
+      .card.card-large-vertical .card_image_wrapper .dark-mode-img {
+        max-height: 340px;
+        content: url('https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/dm/get-started2.png');
+      }
     }
 
     @media only screen and (max-width: 768px) {
@@ -379,10 +390,10 @@
             </div>
             <div class="card_image_wrapper">
               <img class="light-mode-img"
-                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/quote-management.png"
+                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/images/quote-manage-card-light.svg"
                 alt="Quote Management illustration">
               <img class="dark-mode-img"
-                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/dm/quote-management.png"
+                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/images/quote-manage-card-dark.svg"
                 alt="Quote Management illustration (dark mode)">
             </div>
           </a>
@@ -394,10 +405,10 @@
             </div>
             <div class="card_image_wrapper">
               <img class="light-mode-img"
-                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/external-queries.png"
+                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/images/external-queries-card-light.svg"
                 alt="External Queries illustration">
               <img class="dark-mode-img"
-                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/dm/external-queries.png"
+                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/images/external-queries-card-dark.svg"
                 alt="External Queries illustration (dark mode)">
             </div>
           </a>
@@ -412,10 +423,10 @@
             </div>
             <div class="card_image_wrapper">
               <img class="light-mode-img"
-                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/callouts.png"
+                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/images/callouts-card-light.svg"
                 alt="Callouts illustration">
               <img class="dark-mode-img"
-                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/dm/callouts.png"
+                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/images//callouts-card-dark.svg"
                 alt="Callouts illustration (dark mode)">
             </div>
           </a>
@@ -427,10 +438,10 @@
             </div>
             <div class="card_image_wrapper">
               <img class="light-mode-img"
-                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/headless-quotes.png"
+                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/images/headless-quotes-card-light.svg"
                 alt="Headless Quotes illustration">
               <img class="dark-mode-img"
-                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/dm/headless-quotes.png"
+                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/images//headless-quotes-card-dark.svg"
                 alt="Headless Quotes illustration (dark mode)">
             </div>
           </a>
