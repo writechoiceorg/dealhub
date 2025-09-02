@@ -1,0 +1,92 @@
+openapi: 3.0.3
+info:
+  title: DealHub Send Data Externally API (External Call)
+  description: |-
+    This document specifies the contract for an external endpoint that DealHub can call to send playbook data to a third-party system. This functionality, also known as an "External Call," is a one-way data push triggered by a user action within the DealHub CPQ. It does not expect any meaningful data in the response beyond a success or failure status.
+
+    The external system must expose a `POST` endpoint that can accept a JSON payload containing `playbook_data`. Authentication is handled via a Bearer Token or Basic Auth, configured within DealHub.
+  version: 1.0.0
+servers:
+  - url: https://your-external-service.com
+    description: The base URL of your external endpoint that will receive the data from DealHub.
+
+paths:
+  /your-endpoint-path:
+    post:
+      summary: Receive Playbook Data from DealHub
+      description: An endpoint to receive playbook data sent from DealHub when a user triggers an "External Call".
+      operationId: sendDataExternally
+      security:
+        - bearerAuth: []
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExternalDataRequest'
+      responses:
+        '200':
+          description: Success. The data was received successfully. The response body depends on the iFrame configuration in DealHub.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    description: An empty object should be returned if the call was configured to not open an iFrame.
+                  - $ref: '#/components/schemas/RedirectResponse'
+        '400':
+          description: Bad Request. An error occurred on the receiving system.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: A secret token provided by the endpoint provider and configured in DealHub.
+    basicAuth:
+      type: http
+      scheme: basic
+      description: Username and password provided by the endpoint provider and configured in DealHub.
+
+  schemas:
+    ExternalDataRequest:
+      type: object
+      properties:
+        playbook_data:
+          type: object
+          description: >
+            A key-value map of playbook answers configured by the administrator in DealHub.
+            The key format is typically `<playbook_group_id>.<question_id>`.
+            The value can be a string, number, or an array for repeatable questions.
+          additionalProperties:
+            oneOf:
+              - type: string
+              - type: number
+              - type: array
+                items:
+                  type: string
+
+    RedirectResponse:
+      type: object
+      description: This response should be returned if the External Call in DealHub is configured to open in a new window/iFrame.
+      properties:
+        url:
+          type: string
+          format: uri
+          description: The URL that DealHub should load in the iFrame.
+      required:
+        - url
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: A descriptive error message that will be displayed to the user in the DealHub UI.
+      required:
+        - message

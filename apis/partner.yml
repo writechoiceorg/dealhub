@@ -1,0 +1,215 @@
+openapi: 3.0.3
+info:
+  title: DealHub Partner API
+  description: |-
+    This API allows users from Partner Relationship Management (PRM) systems and partner portals to securely access DealHub's CPQ functionality. The integration follows a two-request flow:
+    1.  **Authentication (Server-to-Server):** The PRM system makes a server-side call to `/api/v1/authenticate/user` using a long-lived secret key to get a short-lived (60 seconds) one-time access token for a specific partner user.
+    2.  **Open DealHub CPQ (Client-Side):** The PRM's client-side application uses the one-time access token to make a request to a DealHub endpoint (e.g., `/api/v1/create/quote`). DealHub returns a unique URL. The PRM should then redirect the user's browser to this URL, giving them a seamless and authenticated session in the DealHub portal.
+  version: 1.0.0
+servers:
+  - url: https://{your-dealhub-instance}.dealhub.io
+    description: The base URL for your DealHub instance.
+    variables:
+      your-dealhub-instance:
+        default: app
+        description: Your specific DealHub instance name (e.g., 'app', 'service-eu1').
+
+paths:
+  /api/v1/authenticate/user:
+    post:
+      summary: Authenticate Partner User
+      description: Authenticates a partner user from a PRM system and returns a short-lived (60 seconds) one-time access token. This is a server-to-server call.
+      operationId: authenticatePartnerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthenticationRequest'
+      responses:
+        '200':
+          description: Authentication successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+        '403':
+          description: Forbidden. The authentication key is invalid or the request is from an untrusted IP.
+
+  /api/v1/create/quote:
+    post:
+      summary: Get URL to Create a New Quote
+      description: Retrieves a URL that redirects an authenticated partner user to the quote creation page within DealHub for a specific opportunity. This is a client-side call using the one-time access token.
+      operationId: createPartnerQuote
+      security:
+        - oneTimeAccessToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                opportunity_id:
+                  type: string
+                  description: The CRM's unique identifier for the opportunity.
+              required:
+                - opportunity_id
+      responses:
+        '200':
+          description: Success. The response contains the URL for redirection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedirectResponse'
+        '403':
+          description: Unauthenticated. The one-time access token is missing, invalid, or expired.
+
+  /api/v1/open/quote:
+    post:
+      summary: Get URL to Open an Existing Quote
+      description: Retrieves a URL that redirects an authenticated partner user to an existing quote within DealHub. This is a client-side call using the one-time access token.
+      operationId: openPartnerQuote
+      security:
+        - oneTimeAccessToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                opportunity_id:
+                  type: string
+                  description: The CRM's unique identifier for the opportunity.
+                quote_id:
+                  type: string
+                  description: The CRM's unique identifier for the quote.
+              required:
+                - opportunity_id
+                - quote_id
+      responses:
+        '200':
+          description: Success. The response contains the URL for redirection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedirectResponse'
+        '403':
+          description: Unauthenticated. The one-time access token is missing, invalid, or expired.
+
+  /api/v1/open/opportunity:
+    post:
+      summary: Get URL to View an Opportunity's Quotes
+      description: Retrieves a URL that redirects an authenticated partner user to the opportunity details page in DealHub, listing all associated quotes. This is a client-side call using the one-time access token.
+      operationId: openPartnerOpportunity
+      security:
+        - oneTimeAccessToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                opportunity_id:
+                  type: string
+                  description: The CRM's unique identifier for the opportunity.
+              required:
+                - opportunity_id
+      responses:
+        '200':
+          description: Success. The response contains the URL for redirection.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedirectResponse'
+        '403':
+          description: Unauthenticated. The one-time access token is missing, invalid, or expired.
+
+components:
+  securitySchemes:
+    oneTimeAccessToken:
+      type: http
+      scheme: bearer
+      description: The short-lived (60s) one-time access token returned by the `/authenticate/user` endpoint, used for client-side requests.
+
+  schemas:
+    UserInformation:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [partner]
+        user_id:
+          type: string
+          description: The external ID of the user in the PRM system.
+        login:
+          type: string
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        position:
+          type: string
+        phone:
+          type: string
+        mobile:
+          type: string
+        company:
+          type: string
+        street:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        country:
+          type: string
+        postal_code:
+          type: string
+        profile_img:
+          type: string
+          format: uri
+      required:
+        - type
+        - user_id
+        - login
+        - email
+        - name
+
+    AuthenticationRequest:
+      type: object
+      properties:
+        authentication:
+          type: string
+          description: The long-lived DealHub authentication key generated in the system settings.
+        user_information:
+          $ref: '#/components/schemas/UserInformation'
+      required:
+        - authentication
+        - user_information
+
+    AuthenticationResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          description: A one-time access token, which expires after 60 seconds.
+        errors:
+          type: array
+          items:
+            type: object
+
+    RedirectResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          description: The URL to which the user's browser should be redirected.
+        errors:
+          type: array
+          items:
+            type: object

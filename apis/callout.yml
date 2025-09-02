@@ -1,0 +1,174 @@
+openapi: 3.0.3
+info:
+  title: DealHub Callout API
+  description: |-
+    This API defines the contract for an external system that DealHub calls out to for retrieving real-time prices and product attributes. This is known as the "Callouts API".
+    When a sales representative adds a product configured for "ERP Pricing" to a quote, DealHub sends a POST request to the endpoint defined here. The external system is expected to process the request and return the calculated values for each line item.
+  version: 1.0.1
+servers:
+  - url: https://your-external-system.com/api/pricing
+    description: This is a placeholder URL. The actual, full endpoint URL that DealHub calls is configured by an administrator in the DealHub Version Settings > Advanced Settings > Callouts UI.
+
+security:
+  - bearerAuth: []
+  - basicAuth: []
+
+paths:
+  /:
+    post:
+      summary: Retrieve Prices and Attributes for Quote Items
+      description: |
+        Receives a list of products and bundles from DealHub and returns calculated prices and attributes for each item. The path for this endpoint is also configured by the administrator in the DealHub UI.
+      operationId: getPricing
+      requestBody:
+        description: A request from DealHub containing quote context and a list of items requiring pricing.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalloutRequest'
+      responses:
+        '200':
+          description: Successful response containing the calculated prices and attributes for each item.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalloutResponse'
+        '400':
+          description: Bad Request. An error occurred in the external system. The response should contain a clear error message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer token authentication. The token is provided by the DealHub admin during Callout configuration.
+    basicAuth:
+      type: http
+      scheme: basic
+      description: Basic authentication with username and password. Credentials are provided by the DealHub admin during Callout configuration.
+
+  schemas:
+    CalloutRequest:
+      type: object
+      properties:
+        request_id:
+          type: string
+          description: A unique, randomly generated string to identify the request.
+        authentication:
+          type: string
+          description: Authentication details passed in the request body. This value mirrors the content of the `Authorization` header.
+        playbook_answers:
+          type: object
+          description: A key-value map of playbook answers selected by the administrator in the Callout configuration. The keys and value types are customer-specific.
+          additionalProperties: true
+        items:
+          type: array
+          description: List of items (products or bundles) for pricing.
+          items:
+            $ref: '#/components/schemas/Item'
+      required:
+        - items
+        - request_id
+
+    Item:
+      type: object
+      description: Represents a single product or a bundle within the quote. Can contain additional, customer-defined product attributes configured by the admin.
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: A unique number that identifies the item within this request. Must be returned in the response.
+        sku:
+          type: string
+          description: The SKU of the product or bundle.
+        type:
+          type: string
+          enum: [product, bundle]
+          description: The type of the item.
+        quantity:
+          type: number
+        duration:
+          type: number
+        returned_attributes:
+          type: object
+          description: A list of attributes and their expected data types that DealHub is configured to receive for this item. This serves as a guide for the expected response structure.
+          additionalProperties:
+            type: string
+            enum: [number, percentage, date]
+        bundle_items:
+          type: array
+          description: A list of child items. This is mandatory if the `type` is 'bundle'.
+          items:
+            $ref: '#/components/schemas/Item'
+      required:
+        - id
+        - sku
+        - type
+      additionalProperties: true
+
+    CalloutResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          description: The list of items with their calculated prices and attributes. The structure should mirror the `items` array from the request.
+          items:
+            $ref: '#/components/schemas/ResponseItem'
+
+    ResponseItem:
+      type: object
+      description: Represents the calculated pricing and attribute data for a single item. Can contain additional, customer-defined proposal attributes.
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Same 'id' as sent in the request payload.
+        sku:
+          type: string
+          description: Same 'sku' as sent in the request payload.
+        price:
+          type: number
+          format: float
+          description: List price of the line item. This field is mandatory for every item in the response.
+        MSRP:
+          type: number
+          format: float
+          description: Manufacturer's Suggested Retail Price.
+        partner_discount1:
+          type: number
+          format: float
+          description: Partner discount value (e.g., 10 for 10%).
+        partner_discount2:
+          type: number
+          format: float
+          description: Partner discount value (e.g., 10 for 10%).
+        start_date:
+          type: string
+          format: date-time
+          description: A date value, expected in ISO 8601 format (e.g., "2025-09-01T15:39:25Z").
+        bundle_items:
+          type: array
+          description: Contains returned attributes for child items of a bundle. The structure must mirror the request.
+          items:
+            $ref: '#/components/schemas/ResponseItem'
+      required:
+        - id
+        - sku
+        - price
+      additionalProperties: true
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: A formatted error message from the external system that will be displayed to the user in the DealHub UI.
+      required:
+        - message
+

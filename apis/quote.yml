@@ -1,0 +1,379 @@
+openapi: 3.0.3
+info:
+  title: DealHub Quote Open API
+  description: |-
+    This API provides a set of services to retrieve quote, opportunity, and other related information from the DealHub platform. It allows consuming applications to get detailed data about quotes, create opportunities, and fetch output documents.
+
+    All requests require a secret Bearer Token in the `Authorization` header.
+  version: 1.0.0
+servers:
+  - url: https://{your-dealhub-instance}.dealhub.io
+    description: The base URL for your DealHub instance.
+    variables:
+      your-dealhub-instance:
+        default: app
+        description: Your specific DealHub instance name (e.g., 'app', 'service-eu1').
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/v2/quote/{quote_id}:
+    get:
+      summary: Get Quote by ID
+      description: Retrieves the details of a single existing quote using either its DealHub ID or an external CRM quote ID.
+      operationId: getQuote
+      parameters:
+        - name: quote_id
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 16
+          description: The unique identifier for the quote.
+        - name: feature
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [info, summary, deal_room_info, line_items, answers, approvals, all]
+          description: Specifies which parts of the quote data to retrieve. Can be used multiple times. If omitted, only basic quote info is returned.
+        - name: external_identifier_flag
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: If true, the `quote_id` in the path is treated as an external CRM quote ID.
+      responses:
+        '200':
+          description: Success. Returns the detailed quote object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+        '400':
+          description: Bad Request. The quote ID was not found or the request was invalid.
+        '403':
+          description: Forbidden. Invalid or missing authentication token.
+
+  /api/v2/quotes:
+    get:
+      summary: Get a List of Quotes
+      description: Retrieves a paginated list of quotes, optionally filtered by a CRM opportunity ID.
+      operationId: getQuotes
+      parameters:
+        - name: external_opportunity_id
+          in: query
+          schema:
+            type: string
+            maxLength: 50
+          description: Filter quotes associated with a specific CRM opportunity ID.
+        - name: feature
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [info, summary, deal_room_info, line_items, answers, approvals, all]
+          description: Specifies which features to include for each quote in the list.
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 10000
+            default: 0
+          description: The number of quotes to skip for pagination.
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 50
+          description: The maximum number of quotes to return.
+      responses:
+        '200':
+          description: Success. Returns a list of quotes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuotesListResponse'
+        '403':
+          description: Forbidden. Invalid or missing authentication token.
+
+  /api/v1/opportunity:
+    post:
+      summary: Create Opportunity
+      description: Creates a new opportunity within DealHub. Fails if an opportunity with the same `external_opportunity_id` already exists.
+      operationId: createOpportunity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOpportunityRequest'
+      responses:
+        '200':
+          description: Success. The opportunity was created.
+        '400':
+          description: Bad Request. The opportunity already exists or the payload is invalid.
+        '403':
+          description: Forbidden. Invalid or missing authentication token.
+
+  /api/v1/quote/{dealhub_quote_id}/document:
+    get:
+      summary: Get Quote Document
+      description: Retrieves the output document (e.g., PDF, Word) for a submitted quote.
+      operationId: getQuoteDocument
+      parameters:
+        - name: dealhub_quote_id
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 16
+        - name: document_type
+          in: query
+          schema:
+            type: string
+            enum: [PDF, WORD, EXCEL]
+          description: Specifies the desired document format. If omitted, the default type used at submission is returned.
+      responses:
+        '200':
+          description: Success. Returns the document file as a byte array.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad Request. The quote is in draft status or the requested document type is not available.
+        '403':
+          description: Forbidden. Invalid or missing authentication token.
+
+  /api/v1/dealroom/{opportunity_id}:
+    get:
+      summary: Get DealRoom Signers
+      description: Retrieves information about who has signed the contract in the DealRoom for a given opportunity.
+      operationId: getDealRoomSigners
+      parameters:
+        - name: opportunity_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique ID of the CRM opportunity.
+      responses:
+        '200':
+          description: Success. Returns the list of buyer and seller signers.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DealRoomSignersResponse'
+        '400':
+          description: Bad Request. No DealRoom has been published for this opportunity.
+        '403':
+          description: Forbidden. Invalid or missing authentication token.
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: A secret token generated by a CPQ administrator.
+
+  schemas:
+    QuoteInfo:
+      type: object
+      properties:
+        external_opportunity_id: { type: string }
+        external_quote_id: { type: string }
+        external_customer_id: { type: string }
+        customer_id: { type: string }
+        account_name: { type: string }
+        contact_name: { type: string }
+        contact_email: { type: string, format: email }
+        dealhub_opportunity_id: { type: string }
+        dealhub_quote_name: { type: string }
+        dealhub_quote_number: { type: string }
+        primary_quote: { type: boolean }
+        created_by: { type: string }
+        creation_date: { type: string, format: date-time }
+        submitted_by: { type: string }
+        submission_date: { type: string, format: date-time }
+        expiration_date: { type: string, format: date-time }
+        won_date: { type: string, format: date-time }
+        geo_code: { type: string }
+        currency: { type: string }
+        playbook: { type: string }
+        quote_url: { type: string, format: uri }
+        version_id: { type: string }
+
+    QuoteSummary:
+      type: object
+      properties:
+        currency: { type: string }
+        total_list_price: { type: number }
+        total_net_price: { type: number }
+        total_discount: { type: number }
+        sales_discount: { type: number }
+
+    DealRoomInfo:
+      type: object
+      properties:
+        url: { type: string, format: uri }
+
+    LineItem:
+      type: object
+      properties:
+        id: { type: string }
+        sku: { type: string }
+        bundle_ref: { type: string }
+        name: { type: string }
+        primary_tag: { type: string }
+        system_name: { type: string }
+        system_id: { type: string }
+        system_ordinal: { type: integer }
+        group_name: { type: string }
+        ordinal: { type: integer }
+        msrp: { type: number }
+        msrp_discount: { type: number }
+        list_price: { type: number }
+        user_price: { type: number }
+        user_discount: { type: number }
+        net_per_unit: { type: number }
+        net_price: { type: number }
+        partner_discounts:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              discount: { type: number }
+              price: { type: number }
+        sales_discount: { type: number }
+        total_discount: { type: number }
+        product_factors:
+          type: object
+          additionalProperties: { type: string }
+        attributes:
+          type: object
+          additionalProperties:
+            oneOf:
+             - { type: string }
+             - { type: number }
+
+    PlaybookAnswer:
+      type: object
+      properties:
+        system_name: { type: string }
+        system_id: { type: string }
+        group_id: { type: string }
+        group_name: { type: string }
+        question_id: { type: string }
+        question: { type: string }
+        answer: { type: string }
+
+    Approval:
+      type: object
+      properties:
+        reviewer: { type: string }
+        step: { type: integer }
+        reason: { type: string }
+        status:
+          type: string
+          enum: [waiting, rejected, approved]
+        impersonated_by: { type: string }
+        review_date: { type: string, format: date-time }
+        reviewer_comment: { type: string }
+
+    QuoteResponse:
+      type: object
+      properties:
+        dealhub_quote_id: { type: string }
+        status: { type: string }
+        quote_upgrade_required: { type: boolean }
+        info: { $ref: '#/components/schemas/QuoteInfo' }
+        summary: { $ref: '#/components/schemas/QuoteSummary' }
+        deal_room_info: { $ref: '#/components/schemas/DealRoomInfo' }
+        line_items:
+          type: array
+          items: { $ref: '#/components/schemas/LineItem' }
+        answers:
+          type: array
+          items: { $ref: '#/components/schemas/PlaybookAnswer' }
+        approvals:
+          type: array
+          items: { $ref: '#/components/schemas/Approval' }
+
+    QuotesListResponse:
+      type: object
+      properties:
+        more_results_matching_the_request: { type: boolean }
+        offset: { type: string }
+        limit: { type: string }
+        quotes:
+          type: array
+          items: { $ref: '#/components/schemas/QuoteResponse' }
+
+    OpportunityOwner:
+      type: object
+      properties:
+        external_user_id: { type: string, maxLength: 200 }
+        login: { type: string, maxLength: 100 }
+        email: { type: string, format: email, maxLength: 100 }
+        name: { type: string, maxLength: 300 }
+        position: { type: string, maxLength: 300 }
+        phone: { type: string, maxLength: 50 }
+        mobile: { type: string, maxLength: 100 }
+        fax: { type: string, maxLength: 100 }
+        company: { type: string, maxLength: 100 }
+        street: { type: string, maxLength: 128 }
+        city: { type: string, maxLength: 32 }
+        state: { type: string, maxLength: 32 }
+        country: { type: string, maxLength: 32 }
+        postal_code: { type: string, maxLength: 16 }
+        user_manager_login: { type: string, maxLength: 100 }
+      required:
+       - external_user_id
+       - email
+       - name
+
+    CreateOpportunityRequest:
+      type: object
+      properties:
+        external_opportunity_id: { type: string, maxLength: 50 }
+        external_opportunity_name: { type: string, maxLength: 200 }
+        opportunity_owner: { $ref: '#/components/schemas/OpportunityOwner' }
+        currency: { type: string, maxLength: 3 }
+        external_customer_id: { type: string, maxLength: 50 }
+        customer_name: { type: string, maxLength: 256 }
+      required:
+        - external_opportunity_id
+        - external_opportunity_name
+        - opportunity_owner
+        - currency
+        - external_customer_id
+        - customer_name
+
+    Signer:
+      type: object
+      properties:
+        company_name: { type: string }
+        signee_name: { type: string }
+        signee_title: { type: string }
+        signature_date: { type: string, format: 'date-time' }
+        ordinal: { type: integer }
+
+    DealRoomSignersResponse:
+      type: object
+      properties:
+        dealroom_state: { type: string }
+        buyer_signers:
+          type: array
+          items: { $ref: '#/components/schemas/Signer' }
+        seller_signers:
+          type: array
+          items: { $ref: '#/components/schemas/Signer' }

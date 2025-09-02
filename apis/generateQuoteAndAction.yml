@@ -1,0 +1,478 @@
+openapi: 3.0.3
+info:
+  title: DealHub Generate Quote and Actions API
+  description: |-
+    This API provides headless capabilities for managing the quote lifecycle within DealHub. It allows for the programmatic simulation and generation of quotes, as well as performing actions such as submitting for approval, publishing, and signing.
+
+    All requests require a secret Bearer Token in the `Authorization` header.
+  version: 1.0.0
+servers:
+  - url: https://{your-dealhub-instance}.dealhub.io
+    description: The base URL for your DealHub instance.
+    variables:
+      your-dealhub-instance:
+        default: app
+        description: Your specific DealHub instance name (e.g., 'app', 'service-eu1').
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/v1/quote/simulate:
+    post:
+      summary: Simulate Quote
+      description: Synchronously calculates quote pricing and details based on the provided configuration without creating a persistent quote object in DealHub. Ideal for real-time price calculations.
+      operationId: simulateQuote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulateQuoteRequest'
+      responses:
+        '200':
+          description: Simulation successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+        '400':
+          description: Bad Request. The request payload is invalid or missing required information.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/quote/generate:
+    post:
+      summary: Generate Quote
+      description: Asynchronously creates a new, persistent quote object in DealHub based on the provided data and initial action. The response confirms the request has been accepted for processing.
+      operationId: generateQuote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateQuoteRequest'
+      responses:
+        '202':
+          description: Accepted. The quote generation process has been initiated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/quote/{dealhub_quote_id}/submit:
+    post:
+      summary: Submit Quote
+      description: Asynchronously submits an existing 'Draft' quote for approval.
+      operationId: submitQuote
+      parameters:
+        - name: dealhub_quote_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActionRequest'
+      responses:
+        '202':
+          description: Accepted. The submit action has been initiated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+        '400':
+          description: Bad Request. The quote is not in a submittable state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/quote/{dealhub_quote_id}/publish:
+    post:
+      summary: Publish Quote
+      description: Asynchronously publishes an existing 'Ready to be sent' quote to a DealRoom.
+      operationId: publishQuote
+      parameters:
+        - name: dealhub_quote_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActionRequest'
+      responses:
+        '202':
+          description: Accepted. The publish action has been initiated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+        '400':
+          description: Bad Request. The quote is not in a publishable state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/quote/{dealhub_quote_id}/sign_externally:
+    post:
+      summary: Sign Quote Externally
+      description: Asynchronously marks an existing quote as 'Won'. The quote must be in a 'Ready to be sent' or 'Published' status.
+      operationId: signQuoteExternally
+      parameters:
+        - name: dealhub_quote_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignActionRequest'
+      responses:
+        '202':
+          description: Accepted. The sign externally action has been initiated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuoteResponse'
+        '400':
+          description: Bad Request. The quote cannot be signed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/quote/id/{dealhub_proposal_id}:
+    get:
+      summary: Get DealHub Quote ID
+      description: Retrieves the `dealhub_quote_id` using the `dealhub_proposal_id` (the ID visible in the UI).
+      operationId: getQuoteId
+      parameters:
+        - name: dealhub_proposal_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dealhub_quote_id:
+                    type: string
+        '400':
+          description: Bad Request. The proposal ID does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: A secret token generated by a CPQ administrator.
+
+  schemas:
+    QuoteData:
+      type: object
+      properties:
+        group_id:
+          type: string
+          maxLength: 50
+        questions:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              oneOf:
+                - type: string
+                - type: number
+                - type: boolean
+      required:
+        - group_id
+        - questions
+
+    LineItem:
+      type: object
+      properties:
+        sku:
+          type: string
+        item_name:
+          type: string
+          maxLength: 400
+        bundle_ref_sku:
+          type: string
+        bundle_ref_id:
+          type: integer
+        list_price:
+          type: number
+        net_price_per_unit:
+          type: number
+        net_price:
+          type: number
+        msrp:
+          type: number
+        msrp_discount:
+          type: number
+        sales_discount:
+          type: number
+        total_discount:
+          type: number
+        product_factors:
+          type: object
+          additionalProperties:
+            type: string
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - sku
+        - list_price
+        - net_price
+        - msrp
+        - msrp_discount
+        - sales_discount
+        - total_discount
+        - product_factors
+
+    PartnerProgram:
+      type: object
+      properties:
+        partner_level_name:
+          type: string
+        program_name:
+          type: string
+
+    SimulateQuoteRequest:
+      type: object
+      properties:
+        version_id:
+          type: string
+          maxLength: 16
+        external_opportunity_id:
+          type: string
+          maxLength: 50
+        geo_code:
+          type: string
+          maxLength: 200
+        currency:
+          type: string
+          maxLength: 3
+        line_item_details:
+          type: string
+          enum: [basic, all]
+          default: basic
+        playbook:
+          type: string
+          maxLength: 50
+        total_sales_discount:
+          type: number
+        partner_program:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartnerProgram'
+        quote_data:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuoteData'
+        line_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItem'
+      required:
+        - quote_data
+
+    GenerateQuoteRequest:
+      type: object
+      properties:
+        external_opportunity_id:
+          type: string
+          maxLength: 50
+        request_action:
+          type: string
+          enum: [draft, submit, publish, sign_externally]
+        line_item_details:
+          type: string
+          enum: [basic, all]
+          default: basic
+        playbook:
+          type: string
+          maxLength: 50
+        quote_name:
+          type: string
+          maxLength: 250
+        dealroom_publish_name:
+          type: string
+          maxLength: 250
+        total_sales_discount:
+          type: number
+        expiration_date:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds (GMT).
+        document_type:
+          type: string
+          enum: [DealRoom, PDF, WORD, EXCEL]
+        partner_program:
+          type: array
+          items:
+            $ref: '#/components/schemas/PartnerProgram'
+        timezone_offset:
+          type: number
+          description: Timezone offset from GMT in hours.
+        sign_externally_comment:
+          type: string
+          maxLength: 1000
+        quote_data:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuoteData'
+        line_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItem'
+      required:
+        - external_opportunity_id
+        - request_action
+        - document_type
+        - quote_data
+
+    ActionRequest:
+      type: object
+      properties:
+        line_item_details:
+          type: string
+          enum: [basic, all]
+          default: basic
+    
+    SignActionRequest:
+      allOf:
+        - $ref: '#/components/schemas/ActionRequest'
+        - type: object
+          properties:
+            sign_externally_comment:
+              type: string
+              maxLength: 1000
+          required:
+            - sign_externally_comment
+
+    QuoteResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        dealhub_proposal_id:
+          type: string
+        dealhub_quote_id:
+          type: string
+        dealroom_url:
+          type: string
+          format: uri
+        approval_flows:
+          type: boolean
+        summary:
+          $ref: '#/components/schemas/ResponseSummary'
+        line_items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseLineItem'
+
+    ResponseSummary:
+      type: object
+      properties:
+        currency:
+          type: string
+        total_list_price:
+          type: number
+        total_net_price:
+          type: number
+        total_discount:
+          type: number
+        total_sales_discount:
+          type: number
+
+    ResponseLineItem:
+      type: object
+      properties:
+        id:
+          type: string
+        sku:
+          type: string
+        bundle_ref:
+          type: string
+        name:
+          type: string
+        list_price:
+          type: number
+        net_price:
+          type: number
+        product_factors:
+          type: object
+          additionalProperties:
+            type: string
+        total_discount:
+          type: number
+        additional_data:
+          $ref: '#/components/schemas/ResponseAdditionalData'
+
+    ResponseAdditionalData:
+      type: object
+      properties:
+        primary_tag:
+          type: string
+        msrp:
+          type: number
+        msrp_discount:
+          type: number
+        user_price:
+          type: number
+        net_per_unit:
+          type: number
+        partner_discounts:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              discount:
+                type: number
+              price:
+                type: number
+        sales_discount:
+          type: number
+        attributes:
+          type: object
+          additionalProperties:
+            oneOf:
+              - type: string
+              - type: number
+    
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
