@@ -7,7 +7,7 @@ info:
     2.  **Open DealHub CPQ (Client-Side):** The PRM's client-side application uses the one-time access token to make a request to a DealHub endpoint (e.g., `/api/v1/create/quote`). DealHub returns a unique URL. The PRM should then redirect the user's browser to this URL, giving them a seamless and authenticated session in the DealHub portal.
   version: 1.0.0
 servers:
-  - url: https://{your-dealhub-instance}.dealhub.io
+  - url: https://api.dealhub.io.dealhub.io
     description: The base URL for your DealHub instance.
     variables:
       your-dealhub-instance:

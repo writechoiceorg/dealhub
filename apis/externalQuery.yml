@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: DealHub External Query API
+  title: External Query
   description: |-
     This API defines the contract for an external system that DealHub calls to retrieve data in real-time during quote creation.
     A DealHub administrator configures an "External Query" object, specifying the endpoint URL, authentication, and the data to be sent. When a sales rep triggers this query from the DealHub Playbook, DealHub sends a POST request to the defined endpoint. The external system is expected to process the request and return data that will be populated back into the Playbook.
@@ -13,9 +13,14 @@ security:
   - bearerAuth: []
   - basicAuth: []
 
+tags:
+  - name: External Query
+
 paths:
   /:
     post:
+      tags:
+        - External Query
       summary: Fulfill External Data Query
       description: |
         Receives a request from DealHub containing data from the current quote's playbook and product list. The endpoint should process this data and return information to be populated back into the quote's playbook. The specific path for this endpoint is configured by the administrator in the DealHub UI.

@@ -9,7 +9,7 @@ info:
     All requests require a secret Bearer Token in the `Authorization` header.
   version: 1.0.0
 servers:
-  - url: https://{your-dealhub-instance}.dealhub.io
+  - url: https://api.dealhub.io.dealhub.io
     description: The base URL for your DealHub instance.
     variables:
       your-dealhub-instance:
