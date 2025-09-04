@@ -1,13 +1,13 @@
 openapi: 3.0.3
 info:
-  title: DealHub Generate Quote and Actions API
+  title: Headless API
   description: |-
     This API provides headless capabilities for managing the quote lifecycle within DealHub. It allows for the programmatic simulation and generation of quotes, as well as performing actions such as submitting for approval, publishing, and signing.
 
     All requests require a secret Bearer Token in the `Authorization` header.
   version: 1.0.0
 servers:
-  - url: https://api.dealhub.io.dealhub.io
+  - url: https://api.dealhub.io
     description: The base URL for your DealHub instance.
     variables:
       your-dealhub-instance:
@@ -20,7 +20,9 @@ security:
 paths:
   /api/v1/quote/simulate:
     post:
-      summary: Simulate Quote
+      tags:
+        - Quote Workflow
+      summary: Simulate a Quote
       description: Synchronously calculates quote pricing and details based on the provided configuration without creating a persistent quote object in DealHub. Ideal for real-time price calculations.
       operationId: simulateQuote
       requestBody:
@@ -45,7 +47,9 @@ paths:
 
   /api/v1/quote/generate:
     post:
-      summary: Generate Quote
+      tags:
+        - Quote Workflow
+      summary: Generate a Quote
       description: Asynchronously creates a new, persistent quote object in DealHub based on the provided data and initial action. The response confirms the request has been accepted for processing.
       operationId: generateQuote
       requestBody:
@@ -70,7 +74,9 @@ paths:
 
   /api/v1/quote/{dealhub_quote_id}/submit:
     post:
-      summary: Submit Quote
+      tags:
+        - Quote Workflow
+      summary: Submit a Quote
       description: Asynchronously submits an existing 'Draft' quote for approval.
       operationId: submitQuote
       parameters:
@@ -100,7 +106,9 @@ paths:
 
   /api/v1/quote/{dealhub_quote_id}/publish:
     post:
-      summary: Publish Quote
+      tags:
+        - Quote Workflow
+      summary: Publish a Quote
       description: Asynchronously publishes an existing 'Ready to be sent' quote to a DealRoom.
       operationId: publishQuote
       parameters:
@@ -130,7 +138,9 @@ paths:
 
   /api/v1/quote/{dealhub_quote_id}/sign_externally:
     post:
-      summary: Sign Quote Externally
+      tags:
+        - Quote Workflow
+      summary: Sign a Quote Externally
       description: Asynchronously marks an existing quote as 'Won'. The quote must be in a 'Ready to be sent' or 'Published' status.
       operationId: signQuoteExternally
       parameters:
@@ -161,6 +171,8 @@ paths:
 
   /api/v1/quote/id/{dealhub_proposal_id}:
     get:
+      tags:
+        - Quote Workflow
       summary: Get DealHub Quote ID
       description: Retrieves the `dealhub_quote_id` using the `dealhub_proposal_id` (the ID visible in the UI).
       operationId: getQuoteId

@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: DealHub Quote Open API
+  title: Quote API
   description: |-
     This API provides a set of services for managing and retrieving quote information from the DealHub platform.
 

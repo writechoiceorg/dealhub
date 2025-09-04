@@ -23,11 +23,13 @@ paths:
         - External Query
       summary: External Data Query
       description: |-
-        Receives a request from DealHub containing data from the current quote's playbook and product list. The endpoint should process this data and return information to be populated back into the quote's playbook. The specific path for this endpoint is configured by the administrator in the DealHub UI.
-
         > ❗️ Important 
         >
         > This is not an endpoint provided by DealHub. This page present the endpoint definition you need to make available so DealHub can call it. 
+
+        DealHub uses this endpoint to send requests that share data from the current quote’s playbook and product list. Your endpoint should process this data and return information that will be populated back into the quote’s playbook.
+        
+        The specific URL for this endpoint is configured by the administrator in the DealHub UI.
 
         > 📘 Authentication
         >
