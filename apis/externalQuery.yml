@@ -21,10 +21,25 @@ paths:
     post:
       tags:
         - External Query
-      summary: Fulfill External Data Query
-      description: |
+      summary: External Data Query
+      description: |-
         Receives a request from DealHub containing data from the current quote's playbook and product list. The endpoint should process this data and return information to be populated back into the quote's playbook. The specific path for this endpoint is configured by the administrator in the DealHub UI.
+
+        > ❗️ Important 
+        >
+        > This is not an endpoint provided by DealHub. This page present the endpoint definition you need to make available so DealHub can call it. 
+
+        > 📘 Authentication
+        >
+        > When DealHub calls your endpoint, it will include an `Authorization` header based on the configuration set by an administrator in the DealHub UI. Your endpoint must be prepared to handle one of the following methods:
+        > - **Token (Bearer):** DealHub sends a secret bearer token. Your endpoint should validate this token.
+        > - **Basic:** DealHub sends a username and password for Basic Authentication.
+        > - **None:** No `Authorization` header is sent. This is used when the endpoint is unsecured or uses a different security method, such as a token embedded in the URL.
       operationId: fulfillExternalQuery
+      security:
+        - bearerAuth: []
+        - basicAuth: []
+        - {} # Indicates that no authentication may also be an option
       requestBody:
         description: A request from DealHub containing playbook and product data.
         required: true
@@ -32,6 +47,75 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ExternalQueryRequest'
+            examples:
+              basicQueryWithProducts:
+                summary: Basic query with products
+                value:
+                  playbook_data:
+                    general.currency: "USD"
+                    general.geo: "North America"
+                    group1.customer_type": "Enterprise"
+                    group2.number: 4323.11
+                    group3.proposal_date: "2021-03-25T15:39:25Z"
+                  product_data:
+                    - "ITEM NAME": "Whiteboard"
+                      SKU: "B-12345-W"
+                      attribute1: "1237"
+                    - "ITEM NAME": "Junior Kit"
+                      SKU: "B-56-TRIPLE"
+                      bundle_line_items:
+                        - "ITEM NAME": "Pencil"
+                          SKU: "sku-1"
+                          attribute1: "9"
+                        - "ITEM NAME": "Eraser"
+                          SKU": "sku-2"
+                          attribute1": "2"
+                        - "ITEM NAME": "Sharpener"
+                          SKU": "sku-3"
+                    - "ITEM NAME": "Sharpener"
+                      SKU: "sku-3"
+              repeatableNumericQuestion:
+                summary: Repeatable numeric question
+                value:
+                  playbook_data:
+                    general.currency: "USD"
+                    general.geo: "North America"
+                    group1.customer_type: "Enterprise"
+                    group2.number_of_something: 4323.11
+                    group3.proposal_date: "2021-03-25T15:39:25Z"
+                    group5.repeatableNumericQuestion:
+                      - "1702339200000"
+                      - "1702399200000"
+                      - "1702339298000"
+                      - "1502339200000"
+              repeatableWithEmptyValue:
+                summary: Repeatable question with an empty value
+                value:
+                  playbook_data:
+                    general.currency: "USD"
+                    general.geo: "North America"
+                    group1.customer_type: "Enterprise"
+                    group2.number_of_something: 4323.11
+                    group3.proposal_date: "2021-03-25T15:39:25Z"
+                    group5.repeatableQuestion:
+                      - "op2"
+                      - ""
+                      - "op1"
+                      - "op2"
+              repeatableMultiSelect:
+                summary: Repeatable multi-select 
+                value:
+                  playbook_data:
+                    general.currency: "USD"
+                    general.geo: "North America"
+                    group1.customer_type: "Enterprise"
+                    group2.number_of_something: 4323.11
+                    group3.proposal_date: "2021-03-25T15:39:25Z"
+                    group5.repeatableMultiSelectTextListQuestion:
+                      - "op2; op4"
+                      - "op4"
+                      - "op1; op2; op3"
+                      - ""
       responses:
         '200':
           description: Successful response containing the data to be populated into the DealHub playbook.
@@ -51,11 +135,11 @@ components:
     bearerAuth:
       type: http
       scheme: bearer
-      description: Bearer token authentication. The token is provided by the DealHub admin during the External Query configuration.
+      description: A Bearer Token provided by the administrator during the External Query setup in DealHub.
     basicAuth:
       type: http
       scheme: basic
-      description: Basic authentication. Credentials are provided by the DealHub admin during the External Query configuration.
+      description: Username and password credentials for Basic Authentication, provided during setup.
 
   schemas:
     ExternalQueryRequest:
