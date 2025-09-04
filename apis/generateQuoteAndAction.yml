@@ -9,21 +9,33 @@ info:
 servers:
   - url: https://api.dealhub.io
     description: The base URL for your DealHub instance.
-    variables:
-      your-dealhub-instance:
-        default: app
-        description: Your specific DealHub instance name (e.g., 'app', 'service-eu1').
 
 security:
   - bearerAuth: []
+
+tags:
+  - name: Headless Quoting
+    description: Endpoints for programmatic quote simulation, generation, and lifecycle actions.
 
 paths:
   /api/v1/quote/simulate:
     post:
       tags:
-        - Quote Workflow
+        - Headless Quoting
       summary: Simulate a Quote
-      description: Synchronously calculates quote pricing and details based on the provided configuration without creating a persistent quote object in DealHub. Ideal for real-time price calculations.
+      description: |-
+        Synchronously calculates quote pricing and details based on the provided configuration without creating a persistent quote object in DealHub. Ideal for real-time price calculations.
+
+        Use this endpoint to calculate real-time pricing and quote details without creating a permanent record in DealHub. You have to inform the product and configuration data to receive the calculated line items and a financial summary. 
+
+        To run a simulation, your request must include a `version_id` to specify which pricing and product rules to use. You also need to provide one of the following options:
+
+        - `external_opportunity_id`: Use this to base the simulation on an existing opportunity in your CRM.
+        - `geo_code` and `currency`: Use this combination for simulations that do not depend on specific CRM data.
+
+        > 📘 Required data
+        > 
+        > You must provide either the `external_opportunity_id` or both the `geo_code` and `currency` parameters. Providing both in the same request will result in an error.
       operationId: simulateQuote
       requestBody:
         required: true
@@ -31,6 +43,56 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/SimulateQuoteRequest'
+            examples:
+              simulateQuoteExample:
+                summary: Simulate a quote with playbook data and line items
+                value:
+                  version_id: "20AFDC77E768B703"
+                  geo_code: "us"
+                  currency: "USD"
+                  line_item_details: "all"
+                  playbook: "playbook_api"
+                  total_sales_discount: 10
+                  partner_program:
+                    - partner_level_name: "Silver"
+                      program_name: "Program Name Silver 1"
+                    - partner_level_name: "Gold"
+                      program_name: "Program Name Gold 1"
+                    - partner_level_name: "Platinum"
+                      program_name: "Program Name Platinuml"
+                  quote_data:
+                    - group_id: "qg1"
+                      questions:
+                        - question_id_1: "idl_val"
+                          question_id_2: "id2_vall;id2_val2;id2_val3"
+                          question_id_3: "id3_val"
+                        - question_id_1: "idl_val"
+                          question_id_2: "id2_valA;valB;val2"
+                          question_id_3: "id3_val"
+                    - group_id: "qg2"
+                      questions:
+                        - question_id_1: "idl_val"
+                          question_id_2: "A;B;C"
+                          question_id_3: "some_val"
+                        - question_id_1: "idl_val"
+                          question_id_2: "A,D,N"
+                          question_id_3: "another_val"
+                  line_items:
+                    - sku: "product SKU"
+                      item_name: "Sweatpants"
+                      list_price: 368
+                      net_price_per_unit: 368
+                      net_price: 1472
+                      msrp: 0
+                      msrp_discount: 0
+                      sales_discount: 0
+                      total_discount: 0
+                      product_factors:
+                        Duration: 2
+                        Quantity: 2
+                      attributes:
+                        numeric PA: "50"
+                        currency PA: "50"
       responses:
         '200':
           description: Simulation successful.
@@ -38,6 +100,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QuoteResponse'
+              examples:
+                simulateQuoteResponseExample:
+                  summary: Successful simulation response
+                  value:
+                    approval_flows: false
+                    summary:
+                      currency: "USD"
+                      total_list_price: 458154.42
+                      total_net_price: 238042.66
+                      total_discount: 48.04
+                      total_sales_discount: 0
+                    line_items:
+                      - id: "12345zWIwGV12347"
+                        sku: "999451"
+                        bundle_ref: null
+                        name: "Gold Shield Pack"
+                        list_price: 50.04
+                        net_price: 22500.02
+                        product_factors:
+                          Duration: "1.0"
+                          Quantity: "1.0"
+                        total_discount: 55
+                        additional_data:
+                          primary_tag: "PS"
+                          msrp: 50000.04
+                          msrp_discount: 55
+                          user_price: 22.02
+                          net_per_unit: 22.02
+                          partner_discounts:
+                            - name: "Program Name Silver 1"
+                              discount: 20.0
+                              price: 47.6
+                            - name: "Program Name Gold 1"
+                              discount: 30.0
+                              price: 59.5
+                          sales_discount: 55
+                          attributes:
+                            ARR: "22.02"
+                            Customer Discount: "49.07"
+                            Item Status: "Active"
+                            Inventory Category: "DEFAULT"
+                            Product Line: "Professional Services"
         '400':
           description: Bad Request. The request payload is invalid or missing required information.
           content:
@@ -48,9 +152,13 @@ paths:
   /api/v1/quote/generate:
     post:
       tags:
-        - Quote Workflow
+        - Headless Quoting
       summary: Generate a Quote
-      description: Asynchronously creates a new, persistent quote object in DealHub based on the provided data and initial action. The response confirms the request has been accepted for processing.
+      description: |-
+        Creates an official quote record in DealHub, links it to a CRM opportunity, and initiates any required approval workflows based on your active CPQ version.
+
+        This is an asynchronous endpoint. When you send a request, the API provides an immediate response to confirm that the quote generation process has started. The full processing, including data synchronization with your CRM, happens in the background.
+
       operationId: generateQuote
       requestBody:
         required: true
@@ -58,6 +166,60 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/GenerateQuoteRequest'
+            examples:
+              generateQuoteExample:
+                summary: Generate a new quote to be published
+                value:
+                  request_action: "publish"
+                  external_opportunity_id: "006J7000003wYhD"
+                  line_item_details: "all"
+                  playbook: "playbook_api"
+                  quote_name: "quote name"
+                  dealroom_publish_name: "Dealroom publish name"
+                  expiration_date: 1793788799000
+                  document_type: "DealRoom"
+                  total_sales_discount: 15
+                  timezone_offset: 0
+                  partner_program:
+                    - partner_level_name: "Silver"
+                      program_name: "Program Name Silver 1"
+                    - partner_level_name: "Gold"
+                      program_name: "Program Name Gold 1"
+                    - partner_level_name: "Platinum"
+                      program_name: "Program Name Platinum 1"
+                  quote_data:
+                    - group_id: "qg1"
+                      questions:
+                        - question_id_1: "idl_val"
+                          question_id_2: "id2_vall;id2_val2;id2_val3"
+                          question_id_3: "id3_val"
+                        - question_id_1: "idl_val"
+                          question_id_2: "id2_valA;valB;val2"
+                          question_id_3: "id3_val"
+                    - group_id: "qg2"
+                      questions:
+                        - question_id_1: "idl_val"
+                          question_id_2: "A;B;C"
+                          question_id_3: "some_val"
+                        - question_id_1: "idl_val"
+                          question_id_2: "A,D,N"
+                          question_id_3: "another_val"
+                  line_items:
+                    - sku: "product SKU"
+                      item_name: "Sweatpants"
+                      list_price: 368
+                      net_price_per_unit: 368
+                      net_price: 1472
+                      msrp: 0
+                      msrp_discount: 0
+                      sales_discount: 0
+                      total_discount: 0
+                      product_factors:
+                        Duration: 2
+                        Quantity: 2
+                      attributes:
+                        numeric PA: "50"
+                        currency PA: "50"
       responses:
         '202':
           description: Accepted. The quote generation process has been initiated.
@@ -65,6 +227,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QuoteResponse'
+              examples:
+                generateQuoteResponseExample:
+                  summary: Successful quote generation response
+                  value:
+                    status: "publish"
+                    dealhub_proposal_id: "Q-12927"
+                    dealhub_quote_id: "12345zWIwGV12344"
+                    dealroom_url: "https://dealroom.deahub.io/xxxxxxx"
+                    approval_flows: true
+                    summary:
+                      currency: "USD"
+                      total_list_price: 458154.42
+                      total_net_price: 238042.66
+                      total_discount: 48.04
+                      total_sales_discount: 0
+                    line_items:
+                      - id: "12345zWIwGV12347"
+                        sku: "999451"
+                        bundle_ref: ""
+                        name: "Gold Shield Pack"
+                        list_price: 50.04
+                        net_price: 22500.02
+                        product_factors:
+                          duration: "1.0"
+                          quantity: "1.0"
+                        total_discount: 55
+                        additional_data:
+                          primary_tag: "PS"
+                          msrp: 50000.04
+                          msrp_discount: 55
+                          user_price: 22.02
+                          net_per_unit: 22.02
+                          partner_discounts: []
+                          sales_discount: 55
+                          attributes:
+                            ARR: "22.02"
+                            Customer Discount: "49.07"
+                            Item Status: "Active"
+                            End Reseller Price: "-"
+                            Inventory Category: "DEFAULT"
+                            Product Line: "Professional Services"
         '400':
           description: Bad Request.
           content:
@@ -75,9 +278,9 @@ paths:
   /api/v1/quote/{dealhub_quote_id}/submit:
     post:
       tags:
-        - Quote Workflow
+        - Headless Quoting
       summary: Submit a Quote
-      description: Asynchronously submits an existing 'Draft' quote for approval.
+      description: Asynchronously submits an existing `Draft` quote for approval.
       operationId: submitQuote
       parameters:
         - name: dealhub_quote_id
@@ -85,6 +288,7 @@ paths:
           required: true
           schema:
             type: string
+          description: The unique identifier of the quote in DealHub.
       requestBody:
         content:
           application/json:
@@ -107,9 +311,9 @@ paths:
   /api/v1/quote/{dealhub_quote_id}/publish:
     post:
       tags:
-        - Quote Workflow
+        - Headless Quoting
       summary: Publish a Quote
-      description: Asynchronously publishes an existing 'Ready to be sent' quote to a DealRoom.
+      description: Asynchronously publishes an existing `Ready to be sent` quote to a DealRoom.
       operationId: publishQuote
       parameters:
         - name: dealhub_quote_id
@@ -117,6 +321,7 @@ paths:
           required: true
           schema:
             type: string
+          description: The unique identifier of the quote in DealHub.
       requestBody:
         content:
           application/json:
@@ -139,9 +344,9 @@ paths:
   /api/v1/quote/{dealhub_quote_id}/sign_externally:
     post:
       tags:
-        - Quote Workflow
+        - Headless Quoting
       summary: Sign a Quote Externally
-      description: Asynchronously marks an existing quote as 'Won'. The quote must be in a 'Ready to be sent' or 'Published' status.
+      description: Asynchronously marks an existing quote as `Won`. The quote must be in a `Ready to be sent` or `Published` status.
       operationId: signQuoteExternally
       parameters:
         - name: dealhub_quote_id
@@ -149,6 +354,7 @@ paths:
           required: true
           schema:
             type: string
+          description: The unique identifier of the quote in DealHub.
       requestBody:
         required: true
         content:
@@ -172,7 +378,7 @@ paths:
   /api/v1/quote/id/{dealhub_proposal_id}:
     get:
       tags:
-        - Quote Workflow
+        - Headless Quoting
       summary: Get DealHub Quote ID
       description: Retrieves the `dealhub_quote_id` using the `dealhub_proposal_id` (the ID visible in the UI).
       operationId: getQuoteId
@@ -182,6 +388,7 @@ paths:
           required: true
           schema:
             type: string
+          description: The unique identifier of the proposal in DealHub.
       responses:
         '200':
           description: Success.
@@ -192,6 +399,11 @@ paths:
                 properties:
                   dealhub_quote_id:
                     type: string
+              examples:
+                getQuoteIdExample:
+                  summary: Successful response
+                  value:
+                    dealhub_quote_id: "12345zWIwGV12344"
         '400':
           description: Bad Request. The proposal ID does not exist.
           content:
@@ -213,8 +425,10 @@ components:
         group_id:
           type: string
           maxLength: 50
+          description: DealHub group ID.
         questions:
           type: array
+          description: List of questions data including question ID and answer/s.
           items:
             type: object
             additionalProperties:
@@ -231,44 +445,65 @@ components:
       properties:
         sku:
           type: string
+          description: Unique product catalog identifier. It must exist in the DealHub product catalog.
         item_name:
           type: string
           maxLength: 400
+          description: Catalog product name.
         bundle_ref_sku:
           type: string
+          description: The SKU of the bundle product to which this line item belongs. The value is required if the line item is a component of a bundle. The bundle SKU must exist in the DealHub catalog. This field should be empty for the bundle product itself.
         bundle_ref_id:
           type: integer
+          description: The unique identifier for a bundle instance. This is required for all line items within a bundle and for the bundle's line item itself. It is used to differentiate between multiple instances of the same bundle in a single import.
         list_price:
           type: number
+          description: List price of the line item.
         net_price_per_unit:
           type: number
+          description: Net price per unit of the line item.
         net_price:
           type: number
+          description: Total net price (net per unit x product factors).
         msrp:
           type: number
+          description: line item MSRP (Manufacturer Suggested Retail Price).
         msrp_discount:
           type: number
+          description: Discount applied to the MSRP.
         sales_discount:
           type: number
+          description: Line item sales discount.
         total_discount:
           type: number
+          description: Line item total discount.
+        partner_program_data:
+          type: array
+          items:
+            type: object
+            properties:
+              partner_program_name:
+                type: string
+                maxLength: 200
+                description: Partner program name.
+              partner_level_item_price:
+                type: number
+                description: Item price after partner program level discount.
+              partner_level_item_discount:
+                type: number
+                description: Discount applied to the partner program level.
         product_factors:
           type: object
+          description: List of product-specific factors (e.g., quantity, duration).
           additionalProperties:
             type: string
         attributes:
           type: object
+          description: List of line-item-specific proposal attributes.
           additionalProperties:
             type: string
       required:
         - sku
-        - list_price
-        - net_price
-        - msrp
-        - msrp_discount
-        - sales_discount
-        - total_discount
-        - product_factors
 
     PartnerProgram:
       type: object
@@ -284,36 +519,46 @@ components:
         version_id:
           type: string
           maxLength: 16
+          description: DealHub version ID. If not provided, the system will use the active version.
         external_opportunity_id:
           type: string
           maxLength: 50
+          description: CRM opportunity ID.
         geo_code:
           type: string
           maxLength: 200
+          description: Geographic code.
         currency:
           type: string
           maxLength: 3
+          description: Currency ISO code to evaluate rules. Immutable once created.
         line_item_details:
           type: string
           enum: [basic, all]
           default: basic
+          description: Determines the level of detail included in the response for line items.
         playbook:
           type: string
           maxLength: 50
+          description: The unique name of the playbook (not the display name). If not provided, the system uses the first API-type playbook.
         total_sales_discount:
           type: number
+          description: Total discount for all line items. Overrides default line-item discounts if provided.
         partner_program:
           type: array
           items:
             $ref: '#/components/schemas/PartnerProgram'
+          description: List of selected partner programs.
         quote_data:
           type: array
           items:
             $ref: '#/components/schemas/QuoteData'
+          description: List of question group data, including questions and answers for repeatable/non-repeatable groups.
         line_items:
           type: array
           items:
             $ref: '#/components/schemas/LineItem'
+          description: A list of line items along with their associated data.
       required:
         - quote_data
 
@@ -323,49 +568,61 @@ components:
         external_opportunity_id:
           type: string
           maxLength: 50
+          description: CRM opportunity ID.
         request_action:
           type: string
           enum: [draft, submit, publish, sign_externally]
+          description: Specifies the action (draft, submit, publish, or sign).
         line_item_details:
           type: string
           enum: [basic, all]
           default: basic
+          description: Determines the level of detail included in the response for line items.
         playbook:
           type: string
           maxLength: 50
+          description: The unique name of the playbook (not the display name). If not provided, the system uses the first API-type playbook.
         quote_name:
           type: string
           maxLength: 250
+          description: Quote or proposal name.
         dealroom_publish_name:
           type: string
           maxLength: 250
+          description: DealRoom publish name.
         total_sales_discount:
           type: number
+          description: Total discount for all line items. Overrides default line-item discounts if provided.
         expiration_date:
           type: integer
           format: int64
-          description: Unix timestamp in milliseconds (GMT).
+          description: Quote expiration date as a Unix timestamp (milliseconds, GMT).
         document_type:
           type: string
           enum: [DealRoom, PDF, WORD, EXCEL]
+          description: Specifies document type (e.g., DealRoom, PDF, WORD).
         partner_program:
           type: array
           items:
             $ref: '#/components/schemas/PartnerProgram'
+          description: List of selected partner programs.
         timezone_offset:
           type: number
           description: Timezone offset from GMT in hours.
         sign_externally_comment:
           type: string
           maxLength: 1000
+          description: Includes the necessary comments for external signing. It is required if `request_action` is `sign_externally`.
         quote_data:
           type: array
           items:
             $ref: '#/components/schemas/QuoteData'
+          description: List of question group data, including questions and answers.
         line_items:
           type: array
           items:
             $ref: '#/components/schemas/LineItem'
+          description: A list of line items and their associated data. The system only validates that the SKU for each item exists. All other provided details are accepted as-is, and any existing data for these line items will be overwritten.
       required:
         - external_opportunity_id
         - request_action
@@ -379,6 +636,7 @@ components:
           type: string
           enum: [basic, all]
           default: basic
+          description: Specifies the level of detail to include in the response for line items.
     
     SignActionRequest:
       allOf:
@@ -388,6 +646,7 @@ components:
             sign_externally_comment:
               type: string
               maxLength: 1000
+              description: Includes the necessary comments for external signing.
           required:
             - sign_externally_comment
 
@@ -488,3 +747,4 @@ components:
       properties:
         error:
           type: string
+
