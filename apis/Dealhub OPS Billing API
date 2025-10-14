@@ -1,0 +1,467 @@
+openapi: 3.0.0
+info:
+  title: DealHub Billing API
+  version: '1.0.0'
+  description: |
+    ### API Documentation Overview
+
+    Welcome to the API documentation for managing accounts, subscriptions, invoices, and taxation processes. This API empowers developers to integrate robust billing and subscription management workflows into their applications. With endpoints designed for flexibility and scalability, the API supports essential operations for handling recurring items, one-time charges, invoice management, and taxation.
+
+    ### Key Features
+
+    - **Account Management**: Create, update, and manage customer accounts with detailed attributes like billing preferences, statuses, and external identifiers for seamless integration with CRMs and ERPs.
+    - **Recurring and One-Time Charges**: Streamline subscription management with support for recurring billing cycles and one-off charges, including flexible proration, renewal, and cancellation options.
+    - **Invoice Management**: Retrieve invoices, filter them by status, and handle updates or cancellations with precise control over invoice lifecycle states.
+    - **Taxation**: Integrate with out-of-the-box tax providers like Avalara or implement custom tax workflows. Fetch invoices awaiting taxation, apply multiple tax lines per invoice, and ensure compliance with dynamic tax regulations.
+  contact:
+    name: DealHub Support
+    email: support@dealhub.io
+    url: 'https://dealhub.io/contact'
+servers:
+  - url: 'https://billingapi.dealhub.io'
+    description: Production Server
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: AccessToken
+  schemas:
+    Account:
+      type: object
+      properties:
+        entity_code:
+          type: integer
+          description: The entity code for Account operations.
+          example: 69
+        api_code:
+          type: integer
+          description: The API code for creating or updating an Account.
+          example: 10
+        AccountType:
+          type: integer
+          description: 'Type of account: 1 = Business, 2 = Private.'
+          example: 1
+        AccountStatus:
+          type: integer
+          description: 'Status of the account: 1 = Active, 2 = Inactive, 3 = Billing issues.'
+          example: 1
+        AccountName:
+          type: string
+          description: The name of the account.
+          example: ACME Stripe LTD
+        ExtID:
+          type: string
+          description: External ID for CRM/ERP integration.
+          example: CRMID1
+        PrimaryEmail:
+          type: string
+          description: The primary email address for the account.
+          example: email@qa.com
+        IDNumber2:
+          type: string
+          description: Secondary identifier, typically for ERP integration.
+          example: ERPID1
+        InvoiceName:
+          type: string
+          description: Name to be used on invoices for the account.
+          example: ACME1000
+        City:
+          type: string
+          description: The city where the account is located.
+          example: NY
+        Telephone:
+          type: string
+          description: Primary telephone number for the account.
+          nullable: true
+        Region:
+          type: string
+          description: The region where the account is located.
+          nullable: true
+        Address:
+          type: string
+          description: The full address of the account.
+          nullable: true
+        ZipCode:
+          type: string
+          description: The postal code for the account's address.
+          nullable: true
+        AccountManager:
+          type: string
+          description: The name of the account manager.
+          nullable: true
+        ContactPerson:
+          type: string
+          description: The primary contact person for the account.
+          nullable: true
+        BillingDueDateCalculation:
+          type: integer
+          description: 'Due date calculation method: 1 = Net+, 2 = End of Month+.'
+          example: 1
+        BillingPaymentTermsDays:
+          type: integer
+          description: Number of days for payment terms.
+          example: 30
+        InvoiceType:
+          type: integer
+          description: 'Type of invoice: 1 = Per Account, 0 = Per Plan.'
+          example: 1
+        Liable:
+          type: integer
+          description: 'Indicates if the account is liable for billing: 1 = Liable, 0 = Non-liable.'
+          example: 1
+        InvoiceLanguage:
+          type: integer
+          description: The language for the invoice.
+          example: 1
+        ExtraDetails:
+          type: string
+          description: Additional details or notes for the account.
+          nullable: true
+        p_BusinessEntityID:
+          type: string
+          description: The business entity ID.
+          example: R0mK0gF0j
+        Entity:
+          type: integer
+          description: The entity under which the account is managed.
+          example: 1
+        Country:
+          type: string
+          description: The country where the account is based.
+          example: USA
+        State:
+          type: string
+          description: The state or province where the account is based.
+          example: NY
+    Plan:
+      type: object
+      properties:
+        entity_code:
+          type: integer
+          description: The entity code for Plan operations.
+          example: 71
+        api_code:
+          type: integer
+          description: The API code for creating or updating a Plan.
+          example: 10
+        ExtID:
+          type: string
+          description: External ID for the plan.
+          example: ACME1PLAN
+        ACCOUNTEXTID:
+          type: string
+          description: The external ID of the account to which this plan belongs.
+          example: CRMID1
+        Status:
+          type: integer
+          description: 'Status of the plan: 1 = Active, 2 = Inactive, 3 = On Hold.'
+          example: 1
+        FromDate:
+          type: string
+          format: date-time
+          description: The start date of the plan.
+          example: '2024-01-01T00:00:00'
+        ToDate:
+          type: string
+          format: date-time
+          description: The end date of the plan.
+          example: '2024-12-31T23:59:59'
+        AccountContractName:
+          type: string
+          description: The name of the account contract or plan.
+          example: Gold Subscription
+        ServicePercentage:
+          type: number
+          format: float
+          description: An optional service percentage fee.
+          example: 5.0
+        Currency:
+          type: string
+          description: The currency code for the plan.
+          example: '1'
+    Subscription:
+      type: object
+      properties:
+        entity_code:
+          type: integer
+          description: The entity code for Subscription (Recurring Item) operations.
+          example: 110
+        api_code:
+          type: integer
+          description: The API code for creating or updating a Subscription.
+          example: 10
+        ExtID:
+          type: string
+          description: The external ID for the subscription.
+          example: SUB1
+        ACCOUNTEXTID:
+          type: string
+          description: The external ID of the account.
+          example: CRMID1
+        ACCOUNTPLANEXTID:
+          type: string
+          description: The external ID of the account plan.
+          example: ACME1PLAN
+        RecurringChargeExtID:
+          type: string
+          description: The external ID for the recurring charge.
+          example: R001
+        ChargeDescription:
+          type: string
+          description: A description of the subscription charge.
+          example: My Product Name 1
+        SKU:
+          type: string
+          description: The SKU for the subscription item.
+          example: W
+        FromDate:
+          type: string
+          format: date
+          description: The start date of the subscription.
+          example: '2025-01-01'
+        ToDate:
+          type: string
+          format: date
+          description: The end date of the subscription.
+          example: '2026-01-01'
+        Quantity:
+          type: string
+          description: The quantity of the subscription item.
+          example: '1'
+        Price:
+          type: string
+          description: The price of the subscription item.
+          example: '250'
+        Currency:
+          type: string
+          description: The currency code for the subscription.
+          example: '1'
+        Status:
+          type: string
+          description: 'The status of the subscription: 1 = Active.'
+          example: '1'
+        BillingPeriodType:
+          type: string
+          description: 'The billing period type: 1 = Monthly.'
+          example: '1'
+    SuccessResponse:
+      type: object
+      properties:
+        API_STATUS:
+          type: integer
+          description: Indicates the overall status of the API call. 1 for success.
+          example: 1
+        METHOD_STATUS:
+          type: integer
+          description: Indicates the status of the specific method. 1 for success.
+          example: 1
+        ID:
+          type: string
+          description: The internal identifier of the created or updated object.
+          example: R0mL1lJ2j
+        ExtID:
+          type: string
+          description: The external identifier sent in the request.
+          example: CRMID2
+        METHOD_ERROR:
+          type: string
+          nullable: true
+          description: Null when no error occurred.
+          example: null
+        API_ERROR:
+          type: string
+          nullable: true
+          description: Null when no API-level error occurred.
+          example: null
+        METHOD_ERROR_DESCRIPTION:
+          type: string
+          nullable: true
+          description: Detailed description of any method error, null for success.
+          example: null
+    ErrorResponse:
+      type: object
+      properties:
+        METHOD_STATUS:
+          type: integer
+          description: A value of 0 indicates a method error.
+          example: 0
+        ID:
+          type: string
+          nullable: true
+          description: Null in case of an error.
+          example: null
+        ExtID:
+          type: string
+          nullable: true
+          description: Null in case of an error.
+          example: null
+        METHOD_ERROR:
+          type: string
+          description: A code for the specific error encountered.
+          example: '0'
+        API_ERROR:
+          type: string
+          nullable: true
+          description: Indicates API-level errors, if any.
+          example: null
+        METHOD_ERROR_DESCRIPTION:
+          type: string
+          description: A detailed description of the error.
+          example: API_CODE & ENTITY_CODE Must Get Value
+security:
+  - ApiKeyAuth: []
+tags:
+  - name: Account
+    description: Operations related to customer accounts.
+  - name: Plan
+    description: Operations related to account plans.
+  - name: Subscription
+    description: Operations related to subscriptions and recurring items.
+paths:
+  /api/dynamicapi:
+    get:
+      tags:
+        - Account
+        - Plan
+        - Subscription
+      summary: Retrieve an entity or a list of entities
+      description: Fetches details for a specific entity or a list of all entities based on the provided `entity_code` and `reportcode`.
+      parameters:
+        - name: api_code
+          in: query
+          required: true
+          description: The API code for the retrieve operation.
+          schema:
+            type: integer
+            example: 3
+        - name: entity_code
+          in: query
+          required: true
+          description: The code identifying the entity type to retrieve (e.g., 69 for Account).
+          schema:
+            type: integer
+            example: 69
+        - name: reportcode
+          in: query
+          required: true
+          description: The code for the specific report or list to retrieve.
+          schema:
+            type: integer
+            example: 8006
+        - name: extid
+          in: query
+          required: false
+          description: The external ID of a specific entity to retrieve.
+          schema:
+            type: string
+            example: '30306307227'
+      responses:
+        '200':
+          description: Successfully retrieved the entity or list of entities.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Account'
+                  - $ref: '#/components/schemas/Plan'
+                  - $ref: '#/components/schemas/Subscription'
+        '400':
+          description: Invalid request parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - Account
+        - Plan
+        - Subscription
+      summary: Create or Update an entity
+      description: Creates a new entity or updates an existing one based on the `api_code` and `entity_code` provided in the request body.
+      requestBody:
+        description: The entity payload to create or update. The structure depends on the `entity_code`.
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/Account'
+                - $ref: '#/components/schemas/Plan'
+                - $ref: '#/components/schemas/Subscription'
+            examples:
+              createAccount:
+                summary: Example of creating a new Account
+                value:
+                  entity_code: 69
+                  api_code: 10
+                  AccountType: 1
+                  AccountStatus: 1
+                  AccountName: "ACME Stripe LTD"
+                  ExtID": "CRMID1"
+                  PrimaryEmail: "email@qa.com"
+                  Country: "USA"
+                  State: "NY"
+              createPlan:
+                summary: Example of creating a new Plan
+                value:
+                  entity_code: 71
+                  api_code: 10
+                  ExtID: "ACME1PLAN"
+                  ACCOUNTEXTID": "CRMID1"
+                  Status: 1
+                  FromDate: "2024-01-01T00:00:00"
+                  ToDate: "2024-12-31T23:59:59"
+                  AccountContractName: "Gold Subscription"
+                  Currency: "1"
+              createSubscription:
+                summary: Example of creating a new Subscription
+                value:
+                  entity_code: 110
+                  api_code: 10
+                  ExtID: "SUB1"
+                  ACCOUNTEXTID": "CRMID1"
+                  ACCOUNTPLANEXTID": "ACME1PLAN"
+                  RecurringChargeExtID": "R001"
+                  ChargeDescription: "My Product Name 1"
+                  FromDate: "2025-01-01"
+                  ToDate: "2026-01-01"
+                  Quantity: "1"
+                  Price": "250"
+                  Currency: "1"
+                  Status: "1"
+                  BillingPeriodType": "1"
+      responses:
+        '200':
+          description: The entity was successfully created or updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              examples:
+                accountSuccess:
+                  summary: Successful account creation response
+                  value:
+                    API_STATUS: 1
+                    METHOD_STATUS: 1
+                    ID: "R0mL1lJ2j"
+                    ExtID": "CRMID2"
+                    METHOD_ERROR: null
+                    API_ERROR: null
+                    METHOD_ERROR_DESCRIPTION: null
+        '400':
+          description: Bad Request - The request body is invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                errorResponse:
+                  summary: Example error response
+                  value:
+                    METHOD_STATUS: 0
+                    ID: null
+                    ExtID": null
+                    METHOD_ERROR: "0"
+                    API_ERROR: null
+                    METHOD_ERROR_DESCRIPTION: "API_CODE & ENTITY_CODE Must Get Value"
