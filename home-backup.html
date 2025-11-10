@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dealhub Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* General body and root styles */
+    :root {
+      --container-lg: 1140px;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #F8F9FA;
+    }
+
+    /* Readme specific overrides */
+    .rm-LandingPage {
+      width: 100% !important;
+      padding: 0 !important;
+    }
+
+    .rdmd-html {
+      width: 100% !important;
+    }
+
+    /* Hero Section Styles */
+    .hero {
+      background-image: url('https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/hero-bg.png');
+      background-size: cover;
+      background-position: center;
+      width: 100%;
+      padding: 40px 20px;
+      box-sizing: border-box;
+    }
+
+    .hero_container {
+      max-width: var(--container-lg);
+      margin: 0 auto;
+      text-align: left;
+      padding: 0 20px;
+    }
+
+    .hero_title {
+      color: #FFF !important;
+      font-size: 42px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin: 0 0 20px 0;
+    }
+
+    .hero_content {
+      color: #ccd6f6;
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 1.6;
+      max-width: 650px;
+      margin: 0;
+    }
+
+    /* Main Content & Cards Styles */
+    main {
+      padding: 60px 20px;
+      box-sizing: border-box;
+    }
+
+    .card_container {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 20px;
+
+      .card_content {
+        padding: 25px 0 25px 25px;
+        flex-grow: 1;
+        position: relative;
+        z-index: 2;
+      }
+
+      padding: 0 20px;
+      margin: 0 auto;
+      max-width: var(--container-lg);
+    }
+
+    .right-column-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card-row {
+      display: grid;
+      gap: 20px;
+    }
+
+    .card-row-top {
+      grid-template-columns: 1.5fr 1fr;
+      /* First card is larger */
+    }
+
+    .card-row-bottom {
+      grid-template-columns: 1fr 1.5fr;
+      /* Second card is larger */
+    }
+
+    .card {
+      border: 1px solid #E0E0E0;
+      display: flex;
+      transition: all 0.3s ease;
+      border-radius: 12px;
+      background: #FFF;
+      box-shadow: 0px 4px 25px 0px rgba(0, 0, 0, 0.08);
+      text-decoration: none;
+      overflow: hidden;
+    }
+
+    /* Default card layout (horizontal) */
+    .card {
+      flex-direction: row;
+      align-items: center;
+    }
+
+    /* Large vertical card specific layout */
+    .card.card-large-vertical {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .card.card-large-vertical .card_image_wrapper {
+      flex-grow: 1;
+      width: 100%;
+    }
+
+    .card:hover {
+      cursor: pointer;
+      border-color: #007BFF;
+      box-shadow: 0px 8px 35px 0px rgba(0, 0, 0, 0.12);
+      transform: translateY(-3px);
+    }
+
+    .card:hover .card_content h3 {
+      color: #007BFF;
+    }
+
+    .card_image_wrapper {
+      height: 100%;
+      min-height: 140px;
+      flex: 0 0 40%;
+      /* Image takes 40% of the card width */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card_image_wrapper {
+      height: 100%;
+      min-height: 140px;
+      flex: 0 0 40%;
+      /* Image takes 40% of the card width */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card_image_wrapper img {
+      object-fit: contain;
+      box-sizing: border-box;
+      align-items: center;
+      max-width: fit-content;
+      max-height: 245px;
+    }
+
+    .card.card-large-vertical .card_image_wrapper img {
+      max-width: 100%;
+      max-height: none;
+    }
+
+    .card_content {
+      padding: 25px;
+      flex-grow: 1;
+    }
+
+    .card_content h3 {
+      color: #1c1c1c;
+      font-family: 'Inter', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 10px 0;
+      transition: color 0.3s ease;
+    }
+
+    .card_content p {
+      color: #555;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* Image Visibility Logic */
+    .dark-mode-img {
+      display: none !important;
+      margin: 0 !important;
+    }
+
+    .light-mode-img {
+      display: block;
+      margin: 0 !important;
+    }
+
+    /* Dark Mode Styles for Readme - System Preference */
+    @media (prefers-color-scheme: dark) {
+      [data-color-mode="system"] body {
+        background-color: #121212;
+      }
+
+      [data-color-mode="system"] .card {
+        background-color: #1E1E1E;
+        border: 1px solid #444;
+        box-shadow: 0px 4px 25px 0px rgba(0, 0, 0, 0.2);
+      }
+
+      [data-color-mode="system"] .card_content h3 {
+        color: #FFF;
+      }
+
+      [data-color-mode="system"] .card_content p {
+        color: #BBB;
+      }
+
+      [data-color-mode="system"] .card:hover {
+        border-color: #007BFF;
+      }
+
+      [data-color-mode="system"] .card:hover .card_content h3 {
+        color: #007BFF !important;
+      }
+
+      [data-color-mode="system"] .light-mode-img {
+        display: none;
+      }
+
+      [data-color-mode="system"] .dark-mode-img {
+        display: block !important;
+      }
+    }
+
+    /* Dark Mode Styles for Readme - Explicitly set to Dark */
+    [data-color-mode="dark"] body {
+      background-color: #121212;
+    }
+
+    [data-color-mode="dark"] .card {
+      background-color: #1E1E1E;
+      border: 1px solid #444;
+      box-shadow: 0px 4px 25px 0px rgba(0, 0, 0, 0.2);
+    }
+
+    [data-color-mode="dark"] .card_content h3 {
+      color: #FFF;
+    }
+
+    [data-color-mode="dark"] .card_content p {
+      color: #BBB;
+    }
+
+    [data-color-mode="dark"] .card:hover {
+      border-color: #007BFF;
+    }
+
+    [data-color-mode="dark"] .card:hover .card_content h3 {
+      color: #007BFF !important;
+    }
+
+    [data-color-mode="dark"] .light-mode-img {
+      display: none;
+    }
+
+    [data-color-mode="dark"] .dark-mode-img {
+      display: block !important;
+    }
+
+    @media only screen and (max-width: 1200px) {
+      .card_content p {
+        width: 100%;
+      }
+
+      .card.card-large-vertical .card_content p {
+        width: 100%;
+      }
+    }
+
+    /* Responsive Media Queries */
+    @media only screen and (max-width: 992px) {
+      .card_container {
+        grid-template-columns: 1fr;
+        /* Stack main columns */
+      }
+
+      .hero_title {
+        font-size: 36px;
+      }
+
+      .hero_content {
+        font-size: 16px;
+      }
+
+      .card.card-large-vertical {
+        flex-direction: row;
+        max-height: 250px;
+        justify-content: space-between;
+      }
+
+      .card.card-large-vertical .card_image_wrapper {
+        justify-content: end;
+      }
+
+      .card.card-large-vertical .card_image_wrapper .light-mode-img {
+        max-height: 340px;
+        content: url('https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/get-started2.png');
+      }
+
+      .card.card-large-vertical .card_image_wrapper .dark-mode-img {
+        max-height: 340px;
+        content: url('https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/dm/get-started2.png');
+      }
+    }
+
+    @media only screen and (max-width: 768px) {
+      .hero {
+        padding: 40px 20px;
+      }
+
+      main {
+        padding: 40px 20px;
+      }
+
+      .card-row {
+        grid-template-columns: 1fr;
+        /* Stack cards in rows */
+      }
+
+      .card_image_wrapper {
+        flex: auto;
+        height: 140px;
+        justify-content: right;
+      }
+
+      .card_content p {
+        width: 100%;
+      }
+
+      .hero_title {
+        font-size: 32px;
+      }
+
+      .card_container img {
+        width: 200px !important;
+        flex-shrink: 0;
+      }
+    }
+
+    @media only screen and (max-width: 578px) {
+      .card_content h3 {
+        font-size: 16px;
+      }
+
+      .card_content p,
+      .card.card-large-vertical .card_content p {
+        font-size: 14px;
+        width: 135%;
+      }
+    }
+
+    @media only screen and (max-width: 500px) {
+
+      .card_container img,
+      .card_image_wrapper,
+      .card_container .dark-mode-img {
+        display: none !important;
+      }
+
+      .card_content p,
+      .card.card-large-vertical .card_content p {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="hero">
+    <div class="hero_container">
+      <h1 class="hero_title">Learn how to integrate Dealhub</h1>
+      <p class="hero_content">
+        Explore our guides and examples to integrate Dealhub in order to overcome challenges in legacy payment systems,
+        including regulatory compliance and merchant onboarding.
+      </p>
+    </div>
+  </header>
+  <main>
+    <div class="card_container">
+      <!-- Card 1: Large Vertical -->
+      <a class="card card-large-vertical" href="docs/introduction-to-dealhub-apis">
+        <div class="card_content">
+          <h3>Getting Started</h3>
+          <p>Provides secure, real-time connectivity between devices, services, and applications via robust API
+            endpoints.</p>
+        </div>
+        <div class="card_image_wrapper">
+          <img class="light-mode-img"
+            src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/get-started.png"
+            alt="Getting Started illustration">
+          <img class="dark-mode-img"
+            src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/img/dm/get-started.png"
+            alt="Getting Started illustration (dark mode)">
+        </div>
+      </a>
+
+      <div class="right-column-wrapper">
+        <div class="card-row card-row-top">
+          <!-- Card 2: Top Large -->
+          <a class="card" href="/docs/quote-overview">
+            <div class="card_content">
+              <h3>Quote Management</h3>
+              <p>Easily track, update, and organize all your quotes in one place.</p>
+            </div>
+            <div class="card_image_wrapper">
+              <img class="light-mode-img"
+                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/images/quote-manage-card-light.svg"
+                alt="Quote Management illustration">
+              <img class="dark-mode-img"
+                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/images/quote-manage-card-dark.svg"
+                alt="Quote Management illustration (dark mode)">
+            </div>
+          </a>
+          <!-- Card 3: Top Small -->
+          <a class="card" href="/docs/external-query-overview">
+            <div class="card_content">
+              <h3>External Queries</h3>
+              <p>Pull live system data into DealHub Playbooks for quotes.</p>
+            </div>
+            <div class="card_image_wrapper">
+              <img class="light-mode-img"
+                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/images/external-queries-card-light.svg"
+                alt="External Queries illustration">
+              <img class="dark-mode-img"
+                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/images/external-queries-card-dark.svg"
+                alt="External Queries illustration (dark mode)">
+            </div>
+          </a>
+        </div>
+
+        <div class="card-row card-row-bottom">
+          <!-- Card 4: Bottom Small -->
+          <a class="card" href="/docs/callouts-api-overview">
+            <div class="card_content">
+              <h3>Callouts</h3>
+              <p>Sync live product and pricing data directly into your quotes.</p>
+            </div>
+            <div class="card_image_wrapper">
+              <img class="light-mode-img"
+                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/images/callouts-card-light.svg"
+                alt="Callouts illustration">
+              <img class="dark-mode-img"
+                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/images//callouts-card-dark.svg"
+                alt="Callouts illustration (dark mode)">
+            </div>
+          </a>
+          <!-- Card 5: Bottom Large -->
+          <a class="card" href="/docs/headless-api-overview">
+            <div class="card_content">
+              <h3>Headless Quotes</h3>
+              <p>Automate quote generation through the Headless Quotes API.</p>
+            </div>
+            <div class="card_image_wrapper">
+              <img class="light-mode-img"
+                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/images/headless-quotes-card-light.svg"
+                alt="Headless Quotes illustration">
+              <img class="dark-mode-img"
+                src="https://raw.githubusercontent.com/writechoiceorg/dealhub/refs/heads/main/images//headless-quotes-card-dark.svg"
+                alt="Headless Quotes illustration (dark mode)">
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+
+</html>
