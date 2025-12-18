@@ -125,7 +125,7 @@ paths:
                     items:
                       - id: 1
                         sku: "A-1"
-                        price: 100
+                        list_price: 100
                         MSRP: 200
                         partner_discount1: 10
                         partner_discount2: 10
@@ -137,21 +137,21 @@ paths:
                         bundle_items:
                           - id: 3
                             sku: "B-111"
-                            price: 100
+                            list_price: 100
                             MSRP: 200
                             partner_discount1: 10
                             partner_discount2: 10
                             start_date: "2021-03-25T15:39:25Z"
                           - id: 4
                             sku: "B-222"
-                            price: 100
+                            list_price: 100
                             MSRP: 200
                             partner_discount1: 10
                             partner_discount2: 10
                             start_date: "2021-03-25T15:39:25Z"
                           - id: 5
                             sku: "B-333"
-                            price: 100
+                            list_price: 100
                             MSRP: 200
                             partner_discount1: 10
                             partner_discount2: 10
@@ -284,9 +284,9 @@ components:
         - $ref: '#/components/schemas/BaseResponseItem'
         - type: object
           required:
-            - price
+            - list_price
           properties:
-            price:
+            list_price:
               type: number
               format: float
               description: List price of the line item. This field is mandatory for every product item.
