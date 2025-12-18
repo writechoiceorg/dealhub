@@ -150,14 +150,43 @@ components:
         playbook_data:
           type: object
           description: A key-value map of playbook answers configured by the admin. The key is a string in the format `<group_id>.<question_id>`. The value can be a single value (string, number) or an array for repeatable questions.
-          additionalProperties: true
           example:
             general.currency: "USD"
-            general.geo: "North America"
-            group5.repeatable_question:
+            general.cost_limit: 42.50
+            general.created_at_ms: 1698418023000
+            group5.repeatable_ids:
               - "op2"
-              - ""
-              - "op1"
+              - 1698418023123
+          additionalProperties:
+            oneOf:
+              # Option 1: String
+              - type: string
+                description: Plain text value.
+              
+              # Option 2: Number
+              - type: number
+                description: Integer or floating point number.
+
+              # Option 3: Timestamp (Epoch Milliseconds)
+              # format: int64 ensures it handles large numbers (Long) required for milliseconds
+              - type: integer
+                format: int64
+                description: Unix timestamp in milliseconds (e.g., 1698418023000).
+                example: 1698418023000
+
+              # Option 4: Array (for repeatable questions)
+              # This allows arrays containing mixed or single types defined above
+              - type: array
+                items:
+                  oneOf:
+                    - type: string
+                      description: Plain text value.
+                    - type: number
+                      description: Integer or floating point number.
+                    - type: integer
+                      format: int64
+                      description: Unix timestamp in milliseconds (e.g., 1698418023000).
+                      example: 1698418023000
         product_data:
           type: array
           description: An array of products and bundles currently in the quote.
