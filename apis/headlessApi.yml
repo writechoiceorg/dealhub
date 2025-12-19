@@ -428,7 +428,16 @@ components:
           description: DealHub group ID.
         questions:
           type: array
-          description: List of questions data including question ID and answer/s.
+          description: |-
+            List of questions data including question ID and answer/s. The following answer types are supported:
+            
+            * **Text List:** Contains one or more case-sensitive values, restricted to predefined options. Supports single or multi-select (delimiter: `;`).
+            * **Text Answer:** Captures the value exactly as provided in the request payload.
+            * **Radio Button:** Single case-sensitive value from predefined radio button selections.
+            * **Manual Item:** Valid SKU existing in the system.
+            * **Numeric List:** One or more numeric values from the answer predefined list (delimiter: `;`).
+            * **Numeric Answer/Range:** Single numeric value within a predefined range.
+            * **Date:** Date in `yyyy-mm-dd` format.
           items:
             type: object
             additionalProperties:
